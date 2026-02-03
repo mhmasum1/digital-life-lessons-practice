@@ -2,15 +2,25 @@ import { useEffect, useState } from "react";
 import useAuth from "./useAuth";
 import useAxiosSecure from "./useAxiosSecure";
 
+
 const useUserInfo = () => {
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
     const axiosSecure = useAxiosSecure();
 
     const [dbUser, setDbUser] = useState(null);
-    const [loadingUser, setLoadingUser] = useState(false);
+    const [loadingUser, setLoadingUser] = useState(true);
 
     useEffect(() => {
-        if (!user?.email || !axiosSecure) {
+        if (loading) return;
+
+        if (!user?.email) {
+            setDbUser(null);
+            setLoadingUser(false);
+            return;
+        }
+
+        const token = localStorage.getItem("access-token");
+        if (!token) {
             setDbUser(null);
             setLoadingUser(false);
             return;
@@ -20,21 +30,14 @@ const useUserInfo = () => {
 
         const fetchUser = async () => {
             setLoadingUser(true);
-
             try {
                 const res = await axiosSecure.get(`/users/${user.email}`);
-                if (!cancelled) {
-                    setDbUser(res.data || null);
-                }
+                if (!cancelled) setDbUser(res.data || null);
             } catch (error) {
-                console.error("useUserInfo error:", error);
-                if (!cancelled) {
-                    setDbUser(null);
-                }
+                console.error("useUserInfo error:", error?.response?.data || error?.message);
+                if (!cancelled) setDbUser(null);
             } finally {
-                if (!cancelled) {
-                    setLoadingUser(false);
-                }
+                if (!cancelled) setLoadingUser(false);
             }
         };
 
@@ -43,9 +46,11 @@ const useUserInfo = () => {
         return () => {
             cancelled = true;
         };
-    }, [user?.email]);
+    }, [user?.email, loading, axiosSecure]);
 
-    return { dbUser, loadingUser };
+    const isPremium = dbUser?.isPremium === true;
+
+    return { dbUser, loadingUser, isPremium };
 };
 
 export default useUserInfo;

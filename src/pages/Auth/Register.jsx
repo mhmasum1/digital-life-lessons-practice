@@ -1,221 +1,126 @@
-import { Link, useNavigate } from "react-router-dom";
-import { FcGoogle } from "react-icons/fc";
+import { useForm } from "react-hook-form";
 import useAuth from "../../hooks/useAuth";
-import toast from "react-hot-toast";
-import { TbFidgetSpinner } from "react-icons/tb";
-import useAxiosPublic from "../../hooks/useAxiosPublic";
+import { Link, useLocation, useNavigate } from "react-router";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
+import axios from "axios";
+import SocialLogin from "./SocialLogin";
+
 
 const Register = () => {
-    const {
-        registerUser,
-        updateUserProfile,
-        signInGoogle,
-        loading,
-        setLoading,
-    } = useAuth();
-
+    const { register, handleSubmit, formState: { errors } } = useForm();
+    const { registerUser, updateUserProfile } = useAuth();
+    const location = useLocation();
     const navigate = useNavigate();
-    const axiosPublic = useAxiosPublic();
+    const axiosSecure = useAxiosSecure();
 
-    const getAndStoreToken = async (email) => {
-        const res = await axiosPublic.post("/jwt", { email });
-        const token = res?.data?.token;
-        if (token) {
-            localStorage.setItem("access-token", token);
-        }
-        return token;
-    };
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        const form = event.target;
-        const name = form.name.value;
-        const email = form.email.value;
-        const password = form.password.value;
-        const imageUrl = form.image.value;
+    const handleRegistration = (data) => {
 
-        const finalPhotoURL =
-            imageUrl || "https://i.ibb.co/7S0qM0M/default-avatar.png";
+        const profileImg = data.photo[0];
 
-        try {
-            if (setLoading) setLoading(true);
+        registerUser(data.email, data.password)
+            .then(() => {
 
-            const result = await registerUser(email, password);
-            const createdUser = result?.user;
+                // 1. store the image in form data
+                const formData = new FormData();
+                formData.append('image', profileImg);
 
-            await updateUserProfile(name, finalPhotoURL);
+                // 2. send the photo to store and get the ul
+                const image_API_URL = `https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_photo_host_key}`;
 
-            if (createdUser?.email) {
-                await axiosPublic.post("/users", {
-                    email: createdUser.email,
-                    name: name,
-                    photoURL: finalPhotoURL,
-                    isPremium: false,
-                });
+                axios.post(image_API_URL, formData)
+                    .then(res => {
+                        const photoURL = res.data.data.url;
 
-                await getAndStoreToken(createdUser.email);
-            }
+                        // create user in the database
+                        const userInfo = {
+                            email: data.email,
+                            displayName: data.name,
+                            photoURL: photoURL
+                        }
+                        axiosSecure.post('/users', userInfo)
+                            .then(res => {
+                                if (res.data.insertedId) {
+                                    console.log('user created in the database');
+                                }
+                            })
 
-            toast.success("Signup Successful");
-            navigate("/", { replace: true });
-        } catch (err) {
-            console.log(err);
-            toast.error(err?.message || "Signup failed");
-        } finally {
-            if (setLoading) setLoading(false);
-        }
-    };
 
-    const handleGoogleSignIn = async () => {
-        try {
-            if (setLoading) setLoading(true);
+                        // update user profile to firebase
+                        const userProfile = {
+                            displayName: data.name,
+                            photoURL: photoURL
+                        }
 
-            const result = await signInGoogle();
-            const loggedUser = result?.user;
+                        updateUserProfile(userProfile)
+                            .then(() => {
+                                // console.log('user profile updated done.')
+                                navigate(location.state || '/');
+                            })
+                            .catch(error => console.log(error))
+                    })
 
-            if (loggedUser?.email) {
-                await axiosPublic.post("/users", {
-                    email: loggedUser.email,
-                    name: loggedUser.displayName || "",
-                    photoURL:
-                        loggedUser.photoURL ||
-                        "https://i.ibb.co/7S0qM0M/default-avatar.png",
-                    isPremium: false,
-                });
 
-                // ✅ get JWT + store
-                await getAndStoreToken(loggedUser.email);
-            }
 
-            toast.success("Signup Successful");
-            navigate("/", { replace: true });
-        } catch (err) {
-            console.log(err);
-            toast.error(err?.message || "Google signup failed");
-        } finally {
-            if (setLoading) setLoading(false);
-        }
-    };
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    }
 
     return (
-        <div className="flex justify-center items-center min-h-screen bg-white">
-            <div className="flex flex-col max-w-md p-6 rounded-md sm:p-10 bg-gray-100 text-gray-900">
-                <div className="mb-8 text-center">
-                    <h1 className="my-3 text-4xl font-bold">Sign Up</h1>
-                    <p className="text-sm text-gray-400">
-                        Welcome to Digital Life Lessons
-                    </p>
-                </div>
+        <div className="card bg-base-100 w-full mx-auto max-w-sm shrink-0 shadow-2xl">
+            <p className='text-center'>Please Register</p>
+            <form className="card-body" onSubmit={handleSubmit(handleRegistration)}>
+                <fieldset className="fieldset">
+                    {/* name field */}
+                    <label className="label">Name</label>
+                    <input type="text"
+                        {...register('name', { required: true })}
+                        className="input"
+                        placeholder="Your Name" />
+                    {errors.name?.type === 'required' && <p className='text-red-500'>Name is required.</p>}
 
-                <form
-                    onSubmit={handleSubmit}
-                    noValidate
-                    className="space-y-6 ng-untouched ng-pristine ng-valid"
-                >
-                    <div className="space-y-4">
-                        <div>
-                            <label htmlFor="name" className="block mb-2 text-sm">
-                                Name
-                            </label>
-                            <input
-                                type="text"
-                                name="name"
-                                id="name"
-                                placeholder="Enter Your Name Here"
-                                className="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-primary bg-gray-200 text-gray-900"
-                            />
-                        </div>
+                    {/* photo image field */}
+                    <label className="label">Photo</label>
 
-                        {/* Profile Image URL */}
-                        <div>
-                            <label
-                                htmlFor="image"
-                                className="block mb-2 text-sm font-medium text-gray-700"
-                            >
-                                Profile Image URL
-                            </label>
-                            <input
-                                name="image"
-                                type="text"
-                                id="image"
-                                placeholder="Paste your image URL here"
-                                className="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-primary bg-gray-200 text-gray-900"
-                            />
-                        </div>
+                    <input type="file" {...register('photo', { required: true })} className="file-input" placeholder="Your Photo" />
 
-                        <div>
-                            <label htmlFor="email" className="block mb-2 text-sm">
-                                Email address
-                            </label>
-                            <input
-                                type="email"
-                                name="email"
-                                id="email"
-                                required
-                                placeholder="Enter Your Email Here"
-                                className="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-primary bg-gray-200 text-gray-900"
-                            />
-                        </div>
+                    {errors.name?.type === 'required' && <p className='text-red-500'>Photo is required.</p>}
 
-                        <div>
-                            <div className="flex justify-between">
-                                <label htmlFor="password" className="text-sm mb-2">
-                                    Password
-                                </label>
-                            </div>
-                            <input
-                                type="password"
-                                name="password"
-                                autoComplete="new-password"
-                                id="password"
-                                required
-                                placeholder="*******"
-                                className="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-primary bg-gray-200 text-gray-900"
-                            />
-                        </div>
-                    </div>
+                    {/* email field */}
+                    <label className="label">Email</label>
+                    <input type="email" {...register('email', { required: true })} className="input" placeholder="Email" />
+                    {errors.email?.type === 'required' && <p className='text-red-500'>Email is required.</p>}
 
-                    <div>
-                        <button
-                            type="submit"
-                            className="bg-primary w-full rounded-md py-3 text-white"
-                        >
-                            {loading ? (
-                                <TbFidgetSpinner className="animate-spin m-auto" />
-                            ) : (
-                                "Continue"
-                            )}
-                        </button>
-                    </div>
-                </form>
+                    {/* password */}
+                    <label className="label">Password</label>
+                    <input type="password" {...register('password', {
+                        required: true,
+                        minLength: 6,
+                        pattern: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/
+                    })} className="input" placeholder="Password" />
+                    {
+                        errors.password?.type === 'required' && <p className='text-red-500'>Password is required.</p>
+                    }
+                    {
+                        errors.password?.type === 'minLength' && <p className='text-red-500'>
+                            Password must be 6 characters or longer
+                        </p>
+                    }
+                    {
+                        errors.password?.type === 'pattern' && <p className='text-red-500'>Password must have at least one uppercase, at least one lowercase, at least one number, and at least one special characters</p>
+                    }
 
-                <div className="flex items-center pt-4 space-x-1">
-                    <div className="flex-1 h-px sm:w-16 dark:bg-gray-700" />
-                    <p className="px-3 text-sm dark:text-gray-400">
-                        Signup with social accounts
-                    </p>
-                    <div className="flex-1 h-px sm:w-16 dark:bg-gray-700" />
-                </div>
-
-                <div
-                    onClick={handleGoogleSignIn}
-                    className="flex justify-center items-center space-x-2 border m-3 p-2 border-gray-300 border-rounded cursor-pointer"
-                >
-                    <FcGoogle size={32} />
-                    <p>Continue with Google</p>
-                </div>
-
-                <p className="px-6 text-sm text-center text-gray-400">
-                    Already have an account?{" "}
-                    <Link
-                        to="/auth/login"
-                        className="hover:underline hover:text-lime-500 text-gray-600"
-                    >
-                        Login
-                    </Link>
-                    .
-                </p>
-            </div>
+                    <div><a className="link link-hover">Forgot password?</a></div>
+                    <button className="btn btn-neutral mt-4">Register</button>
+                </fieldset>
+                <p>Already have an account <Link
+                    state={location.state}
+                    className='text-blue-400 underline'
+                    to="/login">Login</Link></p>
+            </form>
+            <SocialLogin></SocialLogin>
         </div>
     );
 };

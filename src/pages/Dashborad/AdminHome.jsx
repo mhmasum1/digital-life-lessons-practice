@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import useAxiosSecure from "../../hooks/useAxiosSecure";
+// import useAxiosSecure from "../../hooks/useAxiosSecure";
 import Spinner from "../../components/common/Spinner";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
 
 
 const StatCard = ({ label, value }) => {

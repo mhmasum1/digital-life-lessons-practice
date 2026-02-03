@@ -1,10 +1,14 @@
-const PaymentCancel = () => {
+import React from 'react';
+import { Link } from 'react-router';
+
+const PaymentCancelled = () => {
     return (
-        <div className="text-center py-10">
-            <h2 className="text-3xl font-bold text-red-600 mb-4">Payment Cancelled</h2>
-            <p>Your payment was cancelled. You can return to the pricing page to try again.</p>
+        <div>
+            <h2>Payment is cancelled. Please try again</h2>
+            <Link to="/dashboard/my-parcels">
+                <button className='btn btn-primary text-black'>Try Again</button></Link>
         </div>
     );
 };
 
-export default PaymentCancel;
+export default PaymentCancelled;

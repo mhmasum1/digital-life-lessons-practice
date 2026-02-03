@@ -1,17 +1,19 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
 import router from "./routes/router";
-import AuthProvider from "./contexts/AuthContext/AuthProvider";
 import "./index.css";
+
+import AuthProvider from './contexts/AuthContext/AuthProvider'
+const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <AuthProvider>
-      <RouterProvider router={router} />
-
-      <Toaster position="top-right" />
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </QueryClientProvider>
   </React.StrictMode>
 );
