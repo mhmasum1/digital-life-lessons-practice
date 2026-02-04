@@ -26,6 +26,10 @@ const Sidebar = () => {
                     <NavLink to="/dashboard" className={linkClass}>
                         User Home
                     </NavLink>
+                    <NavLink to="/dashboard/profile" className={linkClass}>
+                        Profile
+                    </NavLink>
+
 
                     <NavLink to="/dashboard/my-lessons" className={linkClass}>
                         My Lessons
@@ -35,27 +39,28 @@ const Sidebar = () => {
                         Add Lesson
                     </NavLink>
 
-                    <NavLink to="/dashboard/my-favorites" className={linkClass}>
+                    <NavLink to="/dashboard/favorites" className={linkClass}>
                         My Favorites
                     </NavLink>
                 </>
             ) : (
                 <>
-                    <NavLink to="/dashboard/admin" className={linkClass}>
+                    <NavLink to="/dashboard/admin-home" className={linkClass}>
                         Admin Home
                     </NavLink>
 
-                    <NavLink to="/dashboard/admin/manage-users" className={linkClass}>
+                    <NavLink to="/dashboard/manage-users" className={linkClass}>
                         Manage Users
                     </NavLink>
 
-                    <NavLink to="/dashboard/admin/manage-lessons" className={linkClass}>
+                    <NavLink to="/dashboard/manage-lessons" className={linkClass}>
                         Manage Lessons
                     </NavLink>
 
-                    <NavLink to="/dashboard/admin/reported-lessons" className={linkClass}>
+                    <NavLink to="/dashboard/reported-lessons" className={linkClass}>
                         Reported Lessons
                     </NavLink>
+
                 </>
             )}
         </div>

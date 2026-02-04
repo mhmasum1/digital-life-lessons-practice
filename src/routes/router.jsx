@@ -17,12 +17,6 @@ import PaymentCancel from "../pages/Payment/PaymentCancel.jsx";
 
 import Login from "../pages/Auth/Login.jsx";
 import Register from "../pages/Auth/Register.jsx";
-// SocialLogin.jsx যদি আলাদা page হিসেবে route করতে চাও, তাহলে uncomment করো
-// import SocialLogin from "../pages/Auth/SocialLogin.jsx";
-
-// import UserHome from "../pages/Dashboard/UserHome.jsx";
-// import AdminHome from "../pages/Dashboard/AdminHome.jsx";
-// import ManageUsers from "../pages/Dashboard/ManageUsers.jsx";
 import ManageLessons from "../pages/Dashborad/ManageLessons.jsx";
 import ReportedLessons from "../pages/Dashborad/ReportedLessons.jsx";
 
@@ -36,6 +30,7 @@ import AdminRoute from "./AdminRoute";
 import UserHome from "../pages/Dashborad/UserHome.jsx";
 import AdminHome from "../pages/Dashborad/AdminHome.jsx";
 import ManageUsers from "../pages/Dashborad/ManageUsers.jsx";
+import Profile from "../pages/Lessons/Profile.jsx";
 
 const router = createBrowserRouter([
     {
@@ -91,6 +86,8 @@ const router = createBrowserRouter([
             { path: "my-lessons", element: <MyLesson /> },
             { path: "update-lesson/:id", element: <UpdateLesson /> },
             { path: "favorites", element: <MyFavorites /> },
+            { path: "profile", element: <Profile /> },
+
 
             // admin
             {

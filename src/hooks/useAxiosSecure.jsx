@@ -1,28 +1,24 @@
 import axios from "axios";
-import { useEffect } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase/firebase.init";
 
-const axiosSecureInstance = axios.create({
+const axiosSecure = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
 });
 
-const useAxiosSecure = () => {
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const token = await user.getIdToken();
-                axiosSecureInstance.defaults.headers.common["authorization"] =
-                    `Bearer ${token}`;
-            } else {
-                delete axiosSecureInstance.defaults.headers.common["authorization"];
-            }
-        });
+axiosSecure.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem("fb-token");
+        if (token) config.headers.authorization = `Bearer ${token}`;
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
 
-        return () => unsubscribe();
-    }, []);
+axiosSecure.interceptors.response.use(
+    (res) => res,
+    async (error) => {
+        return Promise.reject(error);
+    }
+);
 
-    return axiosSecureInstance;
-};
-
+const useAxiosSecure = () => axiosSecure;
 export default useAxiosSecure;

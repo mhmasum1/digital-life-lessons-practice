@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
+import useUserInfo from "../../hooks/useUserInfo";
 
 const Pricing = () => {
     const { user } = useAuth();

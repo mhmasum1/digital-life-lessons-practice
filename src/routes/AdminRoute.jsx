@@ -10,8 +10,8 @@ const AdminRoute = ({ children }) => {
 
     if (loading || adminLoading) return <Spinner />;
 
-    if (!user) {
-        return <Navigate to="/auth/login" state={{ from: location }} replace />;
+    if (!user?.email) {
+        return <Navigate to="/login" state={{ from: location.pathname }} replace />;
     }
 
     if (!isAdmin) {

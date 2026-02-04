@@ -26,8 +26,10 @@ const AuthProvider = ({ children }) => {
 
     const logOut = () => {
         setLoading(true);
+        localStorage.removeItem("fb-token");
         return signOut(auth);
-    }
+    };
+
 
     const updateUserProfile = (profile) => {
         return updateProfile(auth.currentUser, profile)
@@ -35,15 +37,21 @@ const AuthProvider = ({ children }) => {
 
     // observe user state
     useEffect(() => {
-        const unSubscribe = onAuthStateChanged(auth, (currentUser) => {
+        const unSubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
             setLoading(false);
-            console.log(currentUser)
-        })
-        return () => {
-            unSubscribe();
-        }
-    }, [])
+
+            if (currentUser) {
+                const token = await currentUser.getIdToken();
+                localStorage.setItem("fb-token", token);
+            } else {
+                localStorage.removeItem("fb-token");
+            }
+        });
+
+        return () => unSubscribe();
+    }, []);
+
 
     const authInfo = {
         user,

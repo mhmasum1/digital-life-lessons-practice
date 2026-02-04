@@ -8,7 +8,7 @@ import Spinner from "../../components/common/Spinner";
 
 const MyLesson = () => {
     const { user } = useAuth();
-    const { dbUser } = useUserInfo(); // premium check
+    const { dbUser, loadingUser } = useUserInfo(); // premium check
     const axiosSecure = useAxiosSecure();
 
     const isPremiumUser = dbUser?.isPremium === true;
@@ -16,6 +16,10 @@ const MyLesson = () => {
     const [loading, setLoading] = useState(true);
     const [lessons, setLessons] = useState([]);
     const [rowLoading, setRowLoading] = useState({}); // { [lessonId]: true }
+
+    const setThisRowLoading = (lessonId, value) => {
+        setRowLoading((prev) => ({ ...prev, [lessonId]: value }));
+    };
 
     const fetchMyLessons = async () => {
         try {
@@ -35,10 +39,6 @@ const MyLesson = () => {
         fetchMyLessons();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user?.email]);
-
-    const setThisRowLoading = (lessonId, value) => {
-        setRowLoading((prev) => ({ ...prev, [lessonId]: value }));
-    };
 
     // ---------- Delete ----------
     const handleDelete = async (lessonId) => {
@@ -60,8 +60,9 @@ const MyLesson = () => {
 
     // ---------- Update visibility ----------
     const handleVisibilityChange = async (lessonId, nextValue) => {
-        // optimistic update
         const prevLessons = lessons;
+
+        // optimistic
         setLessons((prev) =>
             prev.map((l) => (l._id === lessonId ? { ...l, visibility: nextValue } : l))
         );
@@ -72,8 +73,7 @@ const MyLesson = () => {
             toast.success("Visibility updated");
         } catch (err) {
             console.error(err);
-            // rollback
-            setLessons(prevLessons);
+            setLessons(prevLessons); // rollback
             toast.error(err?.response?.data?.message || "Failed to update visibility");
         } finally {
             setThisRowLoading(lessonId, false);
@@ -82,12 +82,15 @@ const MyLesson = () => {
 
     // ---------- Update access level ----------
     const handleAccessChange = async (lessonId, nextValue) => {
-        if (!isPremiumUser) {
+        // ✅ Premium gate: free user cannot set premium
+        if (!isPremiumUser && nextValue === "premium") {
             toast.error("Upgrade to Premium to create Premium lessons");
             return;
         }
 
         const prevLessons = lessons;
+
+        // optimistic
         setLessons((prev) =>
             prev.map((l) => (l._id === lessonId ? { ...l, accessLevel: nextValue } : l))
         );
@@ -98,14 +101,14 @@ const MyLesson = () => {
             toast.success("Access level updated");
         } catch (err) {
             console.error(err);
-            setLessons(prevLessons);
+            setLessons(prevLessons); // rollback
             toast.error(err?.response?.data?.message || "Failed to update access level");
         } finally {
             setThisRowLoading(lessonId, false);
         }
     };
 
-    if (loading) return <Spinner />;
+    if (loading || loadingUser) return <Spinner />;
 
     return (
         <div className="p-6">
@@ -133,7 +136,7 @@ const MyLesson = () => {
                     </Link>
                 </div>
             ) : (
-                <div className="overflow-x-auto border rounded-xl">
+                <div className="overflow-x-auto border rounded-xl bg-white">
                     <table className="min-w-full text-sm">
                         <thead className="bg-orange-50 text-gray-700">
                             <tr>
@@ -154,34 +157,41 @@ const MyLesson = () => {
                                 return (
                                     <tr key={lesson._id} className="border-t">
                                         <td className="p-3 font-medium text-gray-900">
-                                            {lesson.title}
-                                            {busy && (
-                                                <span className="ml-2 text-[11px] text-gray-400">
-                                                    saving...
-                                                </span>
-                                            )}
+                                            <div className="flex items-center gap-2">
+                                                <span className="truncate max-w-[360px]">{lesson.title}</span>
+
+                                                {lesson.visibility === "private" && (
+                                                    <span className="badge badge-ghost badge-sm">Private</span>
+                                                )}
+
+                                                {busy && (
+                                                    <span className="text-[11px] text-gray-400">saving...</span>
+                                                )}
+                                            </div>
                                         </td>
 
                                         <td className="p-3">{lesson.category || "-"}</td>
 
-                                        {/* Access dropdown */}
+                                        {/* ✅ Access dropdown (premium option disabled for free users) */}
                                         <td className="p-3">
                                             <select
                                                 className="border rounded-md px-2 py-1 text-xs bg-white"
                                                 value={lesson.accessLevel || "free"}
-                                                disabled={!isPremiumUser || busy}
-                                                title={
-                                                    !isPremiumUser
-                                                        ? "Upgrade to Premium to set Premium access"
-                                                        : ""
-                                                }
-                                                onChange={(e) =>
-                                                    handleAccessChange(lesson._id, e.target.value)
-                                                }
+                                                disabled={busy}
+                                                onChange={(e) => handleAccessChange(lesson._id, e.target.value)}
+                                                title={!isPremiumUser ? "Upgrade to Premium to set Premium access" : ""}
                                             >
                                                 <option value="free">free</option>
-                                                <option value="premium">premium</option>
+                                                <option value="premium" disabled={!isPremiumUser}>
+                                                    premium
+                                                </option>
                                             </select>
+
+                                            {!isPremiumUser && (
+                                                <p className="text-[11px] text-gray-400 mt-1">
+                                                    Upgrade to Premium to set Premium access
+                                                </p>
+                                            )}
                                         </td>
 
                                         {/* Visibility dropdown */}
@@ -190,9 +200,7 @@ const MyLesson = () => {
                                                 className="border rounded-md px-2 py-1 text-xs bg-white"
                                                 value={lesson.visibility || "public"}
                                                 disabled={busy}
-                                                onChange={(e) =>
-                                                    handleVisibilityChange(lesson._id, e.target.value)
-                                                }
+                                                onChange={(e) => handleVisibilityChange(lesson._id, e.target.value)}
                                             >
                                                 <option value="public">public</option>
                                                 <option value="private">private</option>
@@ -202,9 +210,7 @@ const MyLesson = () => {
                                         <td className="p-3">{lesson.savedCount ?? 0}</td>
 
                                         <td className="p-3">
-                                            {lesson.createdAt
-                                                ? new Date(lesson.createdAt).toLocaleDateString()
-                                                : ""}
+                                            {lesson.createdAt ? new Date(lesson.createdAt).toLocaleDateString() : ""}
                                         </td>
 
                                         <td className="p-3 text-right space-x-2">
