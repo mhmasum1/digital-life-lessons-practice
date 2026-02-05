@@ -72,8 +72,6 @@ const router = createBrowserRouter([
         ],
     },
 
-    // dashboard (protected)
-    // router.jsx (only dashboard children part দেখালাম)
     {
         path: "/dashboard",
         element: (
@@ -123,7 +121,6 @@ const router = createBrowserRouter([
                     </AdminRoute>
                 ),
             },
-            // ✅ admin profile (later you can build AdminProfile)
             {
                 path: "admin/profile",
                 element: (

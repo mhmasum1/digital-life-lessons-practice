@@ -1,58 +1,138 @@
 import { useEffect, useState } from "react";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 import Spinner from "../../components/common/Spinner";
+import toast from "react-hot-toast";
+import useAuth from "../../hooks/useAuth";
+import Swal from "sweetalert2";
 
 const ManageUsers = () => {
     const axiosSecure = useAxiosSecure();
+    const { user: currentUser } = useAuth();
 
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(null);
 
-    // 🔹 Load users
     useEffect(() => {
+        let cancelled = false;
+
         const loadUsers = async () => {
             try {
-                const res = await axiosSecure.get("/users");
-                setUsers(res.data);
-            } catch (error) {
-                console.error("Failed to load users", error);
+                setLoading(true);
+                const res = await axiosSecure.get("/admin/users");
+                if (!cancelled) setUsers(res.data || []);
+            } catch (e) {
+                console.error(e);
+                toast.error("Failed to load users");
             } finally {
-                setLoading(false);
+                if (!cancelled) setLoading(false);
             }
         };
+
         loadUsers();
+        return () => {
+            cancelled = true;
+        };
     }, [axiosSecure]);
 
-    // 🔹 Make Admin
-    const handleMakeAdmin = async (id) => {
-        try {
-            setActionLoading(id);
-            await axiosSecure.patch(`/admin/users/${id}/make-admin`);
+    const confirmAction = async ({ title, text, confirmText, confirmColor = "#f97316" }) => {
+        const result = await Swal.fire({
+            title,
+            text,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: confirmText,
+            cancelButtonText: "Cancel",
+            confirmButtonColor: confirmColor,
+            cancelButtonColor: "#64748b",
+            reverseButtons: true,
+            focusCancel: true,
+        });
+        return result.isConfirmed;
+    };
 
-            setUsers(prev =>
-                prev.map(user =>
-                    user._id === id ? { ...user, role: "admin" } : user
-                )
-            );
-        } catch (error) {
-            console.error("Make admin failed", error);
+    const updateRole = async (u, role) => {
+        const isSelf = u.email === currentUser?.email;
+        if (role === "user" && isSelf) {
+            return Swal.fire({
+                icon: "error",
+                title: "Not allowed",
+                text: "You cannot demote yourself.",
+            });
+        }
+
+        const actionLabel = role === "admin" ? "Promote to Admin" : "Demote to User";
+        const ok = await confirmAction({
+            title: actionLabel + "?",
+            text: `This will update role for ${u.email}.`,
+            confirmText: actionLabel,
+            confirmColor: role === "admin" ? "#f97316" : "#334155",
+        });
+        if (!ok) return;
+
+        try {
+            setActionLoading(u._id);
+            await axiosSecure.patch(`/admin/users/${u._id}/role`, { role });
+            setUsers((prev) => prev.map((x) => (x._id === u._id ? { ...x, role } : x)));
+
+            await Swal.fire({
+                icon: "success",
+                title: "Updated!",
+                text: `Role updated to ${role}.`,
+                timer: 1400,
+                showConfirmButton: false,
+            });
+        } catch (e) {
+            console.error(e);
+            Swal.fire({
+                icon: "error",
+                title: "Failed",
+                text: e?.response?.data?.message || "Role update failed",
+            });
         } finally {
             setActionLoading(null);
         }
     };
 
-    // 🔹 Remove User
-    const handleDeleteUser = async (id) => {
-        const confirm = window.confirm("Are you sure you want to delete this user?");
-        if (!confirm) return;
+    const deleteUser = async (u) => {
+        if (!u?.email) return;
+
+        const isSelf = u.email === currentUser?.email;
+        if (isSelf) {
+            return Swal.fire({
+                icon: "error",
+                title: "Not allowed",
+                text: "You cannot delete yourself.",
+            });
+        }
+
+        const ok = await confirmAction({
+            title: "Remove this user?",
+            text: `This will permanently delete ${u.email}.`,
+            confirmText: "Yes, remove",
+            confirmColor: "#ef4444",
+        });
+        if (!ok) return;
 
         try {
-            setActionLoading(id);
-            await axiosSecure.delete(`/admin/users/${id}`);
-            setUsers(prev => prev.filter(user => user._id !== id));
-        } catch (error) {
-            console.error("Delete failed", error);
+            setActionLoading(u.email);
+            await axiosSecure.delete(`/users/${u.email}`);
+            setUsers((prev) => prev.filter((x) => x.email !== u.email));
+
+            await Swal.fire({
+                icon: "success",
+                title: "Removed!",
+                text: "User account deleted.",
+                timer: 1400,
+                showConfirmButton: false,
+            });
+        } catch (e) {
+            console.error(e);
+            Swal.fire({
+                icon: "error",
+                title: "Failed",
+                text: e?.response?.data?.message || "Delete failed",
+            });
         } finally {
             setActionLoading(null);
         }
@@ -74,44 +154,58 @@ const ManageUsers = () => {
                                 <th>#</th>
                                 <th>Name</th>
                                 <th>Email</th>
+                                <th>Total Lessons</th>
                                 <th>Role</th>
-                                <th className="text-center">Action</th>
+                                <th className="text-center">Actions</th>
                             </tr>
                         </thead>
 
                         <tbody>
-                            {users.map((user, index) => (
-                                <tr key={user._id}>
-                                    <td>{index + 1}</td>
-                                    <td>{user.name || "N/A"}</td>
-                                    <td>{user.email}</td>
-                                    <td className="capitalize font-medium">
-                                        {user.role}
-                                    </td>
+                            {users.map((u, idx) => {
+                                const busy = actionLoading === u._id || actionLoading === u.email;
+                                const isSelf = u.email === currentUser?.email;
 
-                                    <td className="flex gap-2 justify-center">
-                                        {user.role !== "admin" && (
+                                return (
+                                    <tr key={u._id}>
+                                        <td>{idx + 1}</td>
+                                        <td>{u.name || "N/A"}</td>
+                                        <td>{u.email}</td>
+                                        <td className="font-semibold">{u.lessonsCount ?? 0}</td>
+                                        <td className="capitalize font-medium">{u.role}</td>
+
+                                        <td className="flex gap-2 justify-center">
+                                            {u.role !== "admin" ? (
+                                                <button
+                                                    disabled={busy}
+                                                    onClick={() => updateRole(u, "admin")}
+                                                    className="btn btn-xs bg-orange-500 text-white"
+                                                >
+                                                    {busy ? "..." : "Promote"}
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    disabled={busy || isSelf}
+                                                    onClick={() => updateRole(u, "user")}
+                                                    className="btn btn-xs bg-gray-700 text-white"
+                                                    title={isSelf ? "You cannot demote yourself" : "Demote to user"}
+                                                >
+                                                    {busy ? "..." : "Demote"}
+                                                </button>
+                                            )}
+
                                             <button
-                                                disabled={actionLoading === user._id}
-                                                onClick={() => handleMakeAdmin(user._id)}
-                                                className="btn btn-xs bg-orange-500 text-white"
+                                                disabled={busy || isSelf}
+                                                onClick={() => deleteUser(u)}
+                                                className="btn btn-xs bg-red-500 text-white"
+                                                title={isSelf ? "You cannot delete yourself" : "Remove user"}
                                             >
-                                                {actionLoading === user._id ? "Processing..." : "Make Admin"}
+                                                {busy ? "..." : "Remove"}
                                             </button>
-                                        )}
-
-                                        <button
-                                            disabled={actionLoading === user._id}
-                                            onClick={() => handleDeleteUser(user._id)}
-                                            className="btn btn-xs bg-red-500 text-white"
-                                        >
-                                            Remove
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
-
                     </table>
                 </div>
             )}
