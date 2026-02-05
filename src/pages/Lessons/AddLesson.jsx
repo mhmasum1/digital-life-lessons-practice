@@ -5,6 +5,9 @@ import useAuth from "../../hooks/useAuth";
 import useUserInfo from "../../hooks/useUserInfo";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 
+import Lottie from "lottie-react";
+import successAnim from "../../assets/lottie/Success.json";
+
 const AddLesson = () => {
     const { user } = useAuth();
     const { dbUser, loadingUser } = useUserInfo();
@@ -19,7 +22,9 @@ const AddLesson = () => {
     const [accessLevel, setAccessLevel] = useState("free");
     const [visibility, setVisibility] = useState("public");
 
-    // ✅ Free user হলে premium selected থাকলে auto free করে দেবে (edge case)
+    // Lottie modal state
+    const [showSuccess, setShowSuccess] = useState(false);
+
     useEffect(() => {
         if (!isPremiumUser && accessLevel === "premium") {
             setAccessLevel("free");
@@ -30,13 +35,10 @@ const AddLesson = () => {
         return <Navigate to="/auth/login" replace />;
     }
 
-
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!user?.email) return;
 
-        // ✅ server-side safe guard (assignment premium gate)
         if (!isPremiumUser && accessLevel === "premium") {
             toast.error("Upgrade to Premium to create Premium lessons");
             return;
@@ -53,7 +55,6 @@ const AddLesson = () => {
             accessLevel,
             visibility,
 
-            // server already trusts token, still ok to send
             creatorEmail: user.email,
             creatorName: user.displayName || dbUser?.name || "Anonymous",
             creatorPhotoURL: user.photoURL || dbUser?.photoURL || "",
@@ -68,7 +69,14 @@ const AddLesson = () => {
                 form.reset();
                 setAccessLevel("free");
                 setVisibility("public");
-                navigate("/dashboard/my-lessons", { replace: true });
+
+                // ✅ show Lottie success overlay then redirect
+                setShowSuccess(true);
+
+                setTimeout(() => {
+                    setShowSuccess(false);
+                    navigate("/dashboard/my-lessons", { replace: true });
+                }, 1600);
             } else {
                 toast.error("Something went wrong. Please try again.");
             }
@@ -85,7 +93,20 @@ const AddLesson = () => {
     }
 
     return (
-        <div className="max-w-3xl mx-auto px-4 py-10">
+        <div className="max-w-3xl mx-auto px-4 py-10 relative">
+            {/* ✅ Success Lottie Overlay */}
+            {showSuccess && (
+                <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl border border-orange-100 text-center">
+                        <div className="mx-auto w-44">
+                            <Lottie animationData={successAnim} loop={false} />
+                        </div>
+                        <p className="mt-2 font-semibold text-gray-900">Saved!</p>
+                        <p className="text-xs text-gray-600">Redirecting to My Lessons…</p>
+                    </div>
+                </div>
+            )}
+
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
                 Share a Life Lesson
             </h1>
@@ -93,7 +114,6 @@ const AddLesson = () => {
                 Write a real story, insight or experience that could help other students and learners.
             </p>
 
-            {/* ✅ Premium upsell message (only for free users) */}
             {!isPremiumUser && (
                 <div className="mb-5 rounded-xl border border-orange-200 bg-orange-50 p-4">
                     <p className="font-semibold text-gray-900">Premium lesson is locked</p>
@@ -157,9 +177,7 @@ const AddLesson = () => {
 
                 <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Category
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                         <select
                             name="category"
                             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary"
@@ -177,9 +195,7 @@ const AddLesson = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Emotional tone
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Emotional tone</label>
                         <select
                             name="emotionalTone"
                             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary"
@@ -196,7 +212,7 @@ const AddLesson = () => {
                     </div>
                 </div>
 
-                {/* ✅ Access level (Premium gated) */}
+                {/* Access level */}
                 <div>
                     <p className="block text-sm font-medium text-gray-700 mb-1">Access level</p>
 
@@ -232,9 +248,7 @@ const AddLesson = () => {
                                 disabled={!isPremiumUser}
                             />
                             <span>Premium lesson</span>
-                            {!isPremiumUser && (
-                                <span className="text-[11px] text-gray-500">(Locked)</span>
-                            )}
+                            {!isPremiumUser && <span className="text-[11px] text-gray-500">(Locked)</span>}
                         </label>
                     </div>
                 </div>
