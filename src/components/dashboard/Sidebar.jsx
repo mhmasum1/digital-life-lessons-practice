@@ -45,23 +45,12 @@ const Sidebar = () => {
                 </>
             ) : (
                 <>
-                    <NavLink to="/dashboard/admin-home" className={linkClass}>
-                        Admin Home
-                    </NavLink>
-
-                    <NavLink to="/dashboard/manage-users" className={linkClass}>
-                        Manage Users
-                    </NavLink>
-
-                    <NavLink to="/dashboard/manage-lessons" className={linkClass}>
-                        Manage Lessons
-                    </NavLink>
-
-                    <NavLink to="/dashboard/reported-lessons" className={linkClass}>
-                        Reported Lessons
-                    </NavLink>
-
-                </>
+                    {/* admin */}
+                    <NavLink to="/dashboard/admin" className={linkClass}>Admin Home</NavLink>
+                    <NavLink to="/dashboard/admin/manage-users" className={linkClass}>Manage Users</NavLink>
+                    <NavLink to="/dashboard/admin/manage-lessons" className={linkClass}>Manage Lessons</NavLink>
+                    <NavLink to="/dashboard/admin/reported-lessons" className={linkClass}>Reported Lessons</NavLink>
+                    <NavLink to="/dashboard/admin/profile" className={linkClass}>Admin Profile</NavLink></>
             )}
         </div>
     );

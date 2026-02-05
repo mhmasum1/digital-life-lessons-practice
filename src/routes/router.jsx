@@ -31,6 +31,7 @@ import UserHome from "../pages/Dashborad/UserHome.jsx";
 import AdminHome from "../pages/Dashborad/AdminHome.jsx";
 import ManageUsers from "../pages/Dashborad/ManageUsers.jsx";
 import Profile from "../pages/Lessons/Profile.jsx";
+import AdminProfile from "../pages/Dashborad/AdminProfile.jsx";
 
 const router = createBrowserRouter([
     {
@@ -72,6 +73,7 @@ const router = createBrowserRouter([
     },
 
     // dashboard (protected)
+    // router.jsx (only dashboard children part দেখালাম)
     {
         path: "/dashboard",
         element: (
@@ -88,10 +90,9 @@ const router = createBrowserRouter([
             { path: "favorites", element: <MyFavorites /> },
             { path: "profile", element: <Profile /> },
 
-
             // admin
             {
-                path: "admin-home",
+                path: "admin",
                 element: (
                     <AdminRoute>
                         <AdminHome />
@@ -99,7 +100,7 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: "manage-users",
+                path: "admin/manage-users",
                 element: (
                     <AdminRoute>
                         <ManageUsers />
@@ -107,7 +108,7 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: "manage-lessons",
+                path: "admin/manage-lessons",
                 element: (
                     <AdminRoute>
                         <ManageLessons />
@@ -115,15 +116,26 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: "reported-lessons",
+                path: "admin/reported-lessons",
                 element: (
                     <AdminRoute>
                         <ReportedLessons />
                     </AdminRoute>
                 ),
             },
+            // ✅ admin profile (later you can build AdminProfile)
+            {
+                path: "admin/profile",
+                element: (
+                    <AdminRoute>
+                        <AdminProfile />
+                    </AdminRoute>
+                ),
+            },
         ],
-    },
+    }
+
+    ,
 
     { path: "*", element: <NotFound /> },
 ]);
