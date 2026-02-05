@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 import Spinner from "../../components/common/Spinner";
 import toast from "react-hot-toast";
@@ -30,13 +30,13 @@ const ManageLessons = () => {
     const [lessons, setLessons] = useState([]);
 
     // filters
-    const [visibility, setVisibility] = useState("all"); // all/public/private
-    const [flagged, setFlagged] = useState("all"); // all/true/false
+    const [visibility, setVisibility] = useState("all");
+    const [flagged, setFlagged] = useState("all");
     const [category, setCategory] = useState("");
 
     // edit modal
     const [editOpen, setEditOpen] = useState(false);
-    const [editing, setEditing] = useState(null); // lesson object
+    const [editing, setEditing] = useState(null);
     const [form, setForm] = useState(emptyForm);
     const [saving, setSaving] = useState(false);
 
@@ -45,7 +45,7 @@ const ManageLessons = () => {
         return ["", ...Array.from(set)];
     }, [lessons]);
 
-    const confirmAction = async ({ title, text, confirmText, confirmColor = "#f97316", icon = "warning" }) => {
+    const confirmAction = useCallback(async ({ title, text, confirmText, confirmColor, icon = "warning" }) => {
         const result = await Swal.fire({
             title,
             text,
@@ -53,24 +53,29 @@ const ManageLessons = () => {
             showCancelButton: true,
             confirmButtonText: confirmText,
             cancelButtonText: "Cancel",
-            confirmButtonColor: confirmColor,
+            confirmButtonColor: confirmColor || "#f97316",
             cancelButtonColor: "#64748b",
             reverseButtons: true,
             focusCancel: true,
         });
         return result.isConfirmed;
-    };
+    }, []);
 
-    const successToast = (title, text) =>
-        Swal.fire({
+    const successToast = useCallback(async (title, text) => {
+        await Swal.fire({
             icon: "success",
             title,
             text,
             timer: 1400,
             showConfirmButton: false,
         });
+    }, []);
 
-    const load = async () => {
+    const failToast = useCallback((title, text) => {
+        Swal.fire({ icon: "error", title, text });
+    }, []);
+
+    const load = useCallback(async () => {
         try {
             setLoading(true);
             const res = await axiosSecure.get(
@@ -85,112 +90,13 @@ const ManageLessons = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [axiosSecure, visibility, flagged, category]);
 
     useEffect(() => {
         load();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [axiosSecure, visibility, flagged, category]);
+    }, [load]);
 
-    const toggleVisibility = async (lesson) => {
-        const isPublic = lesson.visibility === "public";
-        const nextLabel = isPublic ? "Make Private" : "Publish";
-
-        const ok = await confirmAction({
-            title: `${nextLabel}?`,
-            text: `This will change visibility for "${lesson.title}".`,
-            confirmText: nextLabel,
-            confirmColor: "#111827",
-        });
-        if (!ok) return;
-
-        try {
-            setActionLoading(lesson._id);
-            const res = await axiosSecure.patch(`/admin/lessons/${lesson._id}/toggle-visibility`);
-            const next = res.data?.visibility;
-
-            setLessons((prev) =>
-                prev.map((l) => (l._id === lesson._id ? { ...l, visibility: next || l.visibility } : l))
-            );
-            await successToast("Updated!", `Visibility is now ${next || (isPublic ? "private" : "public")}.`);
-        } catch (e) {
-            console.error(e);
-            Swal.fire({ icon: "error", title: "Failed", text: "Failed to update visibility" });
-        } finally {
-            setActionLoading(null);
-        }
-    };
-
-    const setFeatured = async (lesson, featured) => {
-        const actionLabel = featured ? "Feature" : "Unfeature";
-        const ok = await confirmAction({
-            title: `${actionLabel} this lesson?`,
-            text: `This will ${featured ? "add" : "remove"} "${lesson.title}" from featured list.`,
-            confirmText: actionLabel,
-            confirmColor: "#f97316",
-        });
-        if (!ok) return;
-
-        try {
-            setActionLoading(lesson._id);
-            await axiosSecure.patch(`/admin/lessons/${lesson._id}/featured`, { featured });
-            setLessons((prev) => prev.map((l) => (l._id === lesson._id ? { ...l, isFeatured: featured } : l)));
-            await successToast("Updated!", featured ? "Marked as featured." : "Removed from featured.");
-        } catch (e) {
-            console.error(e);
-            Swal.fire({ icon: "error", title: "Failed", text: "Failed to update featured" });
-        } finally {
-            setActionLoading(null);
-        }
-    };
-
-    const setReviewed = async (lesson, reviewed) => {
-        const actionLabel = reviewed ? "Mark Reviewed" : "Unreview";
-        const ok = await confirmAction({
-            title: `${actionLabel}?`,
-            text: `This will ${reviewed ? "mark" : "unmark"} "${lesson.title}" as reviewed.`,
-            confirmText: actionLabel,
-            confirmColor: "#2563eb",
-        });
-        if (!ok) return;
-
-        try {
-            setActionLoading(lesson._id);
-            await axiosSecure.patch(`/admin/lessons/${lesson._id}/reviewed`, { reviewed });
-            setLessons((prev) => prev.map((l) => (l._id === lesson._id ? { ...l, isReviewed: reviewed } : l)));
-            await successToast("Updated!", reviewed ? "Marked reviewed." : "Unreviewed.");
-        } catch (e) {
-            console.error(e);
-            Swal.fire({ icon: "error", title: "Failed", text: "Failed to update reviewed" });
-        } finally {
-            setActionLoading(null);
-        }
-    };
-
-    const deleteLesson = async (lesson) => {
-        const ok = await confirmAction({
-            title: "Delete this lesson?",
-            text: `This will soft delete "${lesson.title}".`,
-            confirmText: "Yes, delete",
-            confirmColor: "#ef4444",
-        });
-        if (!ok) return;
-
-        try {
-            setActionLoading(lesson._id);
-            await axiosSecure.delete(`/lessons/${lesson._id}`); // admin soft delete ✅
-            setLessons((prev) => prev.filter((l) => l._id !== lesson._id));
-            await successToast("Deleted!", "Lesson removed successfully.");
-        } catch (e) {
-            console.error(e);
-            Swal.fire({ icon: "error", title: "Failed", text: "Failed to delete lesson" });
-        } finally {
-            setActionLoading(null);
-        }
-    };
-
-    // ====== EDIT MODAL ======
-    const openEdit = (lesson) => {
+    const openEdit = useCallback((lesson) => {
         setEditing(lesson);
         setForm({
             title: lesson.title || "",
@@ -202,16 +108,130 @@ const ManageLessons = () => {
             visibility: lesson.visibility || "public",
         });
         setEditOpen(true);
-    };
+    }, []);
 
-    const closeEdit = () => {
+    const closeEdit = useCallback(() => {
         if (saving) return;
         setEditOpen(false);
         setEditing(null);
         setForm(emptyForm);
-    };
+    }, [saving]);
 
     const updateForm = (key, value) => setForm((p) => ({ ...p, [key]: value }));
+
+    const runAction = useCallback(
+        async ({ lesson, confirm, request, onSuccess, successMsg, failMsg }) => {
+            const ok = await confirmAction(confirm);
+            if (!ok) return;
+
+            try {
+                setActionLoading(lesson._id);
+
+                const res = await request();
+                await onSuccess?.(res);
+
+                if (successMsg) await successToast(successMsg.title, successMsg.text);
+            } catch (e) {
+                console.error(e);
+                failToast(failMsg?.title || "Failed", failMsg?.text || "Action failed");
+            } finally {
+                setActionLoading(null);
+            }
+        },
+        [confirmAction, failToast, successToast]
+    );
+
+    const toggleVisibility = useCallback(
+        async (lesson) => {
+            const isPublic = lesson.visibility === "public";
+            const nextLabel = isPublic ? "Make Private" : "Publish";
+
+            await runAction({
+                lesson,
+                confirm: {
+                    title: `${nextLabel}?`,
+                    text: `This will change visibility for "${lesson.title}".`,
+                    confirmText: nextLabel,
+                    confirmColor: "#111827",
+                },
+                request: () => axiosSecure.patch(`/admin/lessons/${lesson._id}/toggle-visibility`),
+                onSuccess: (res) => {
+                    const next = res.data?.visibility;
+                    setLessons((prev) => prev.map((l) => (l._id === lesson._id ? { ...l, visibility: next || l.visibility } : l)));
+                },
+                successMsg: { title: "Updated!", text: "Visibility updated." },
+                failMsg: { title: "Failed", text: "Failed to update visibility" },
+            });
+        },
+        [axiosSecure, runAction]
+    );
+
+    const setFeatured = useCallback(
+        async (lesson, featured) => {
+            const actionLabel = featured ? "Feature" : "Unfeature";
+
+            await runAction({
+                lesson,
+                confirm: {
+                    title: `${actionLabel} this lesson?`,
+                    text: `This will ${featured ? "add" : "remove"} "${lesson.title}" from featured list.`,
+                    confirmText: actionLabel,
+                    confirmColor: "#f97316",
+                },
+                request: () => axiosSecure.patch(`/admin/lessons/${lesson._id}/featured`, { featured }),
+                onSuccess: () => {
+                    setLessons((prev) => prev.map((l) => (l._id === lesson._id ? { ...l, isFeatured: featured } : l)));
+                },
+                successMsg: { title: "Updated!", text: featured ? "Marked as featured." : "Removed from featured." },
+                failMsg: { title: "Failed", text: "Failed to update featured" },
+            });
+        },
+        [axiosSecure, runAction]
+    );
+
+    const setReviewed = useCallback(
+        async (lesson, reviewed) => {
+            const actionLabel = reviewed ? "Mark Reviewed" : "Unreview";
+
+            await runAction({
+                lesson,
+                confirm: {
+                    title: `${actionLabel}?`,
+                    text: `This will ${reviewed ? "mark" : "unmark"} "${lesson.title}" as reviewed.`,
+                    confirmText: actionLabel,
+                    confirmColor: "#2563eb",
+                },
+                request: () => axiosSecure.patch(`/admin/lessons/${lesson._id}/reviewed`, { reviewed }),
+                onSuccess: () => {
+                    setLessons((prev) => prev.map((l) => (l._id === lesson._id ? { ...l, isReviewed: reviewed } : l)));
+                },
+                successMsg: { title: "Updated!", text: reviewed ? "Marked reviewed." : "Unreviewed." },
+                failMsg: { title: "Failed", text: "Failed to update reviewed" },
+            });
+        },
+        [axiosSecure, runAction]
+    );
+
+    const deleteLesson = useCallback(
+        async (lesson) => {
+            await runAction({
+                lesson,
+                confirm: {
+                    title: "Delete this lesson?",
+                    text: `This will soft delete "${lesson.title}".`,
+                    confirmText: "Yes, delete",
+                    confirmColor: "#ef4444",
+                },
+                request: () => axiosSecure.delete(`/lessons/${lesson._id}`),
+                onSuccess: () => {
+                    setLessons((prev) => prev.filter((l) => l._id !== lesson._id));
+                },
+                successMsg: { title: "Deleted!", text: "Lesson removed successfully." },
+                failMsg: { title: "Failed", text: "Failed to delete lesson" },
+            });
+        },
+        [axiosSecure, runAction]
+    );
 
     const saveEdit = async (e) => {
         e.preventDefault();
@@ -241,21 +261,14 @@ const ManageLessons = () => {
 
         try {
             setSaving(true);
-            await axiosSecure.patch(`/lessons/${editing._id}`, payload); // ✅ owner/admin allowed
+            await axiosSecure.patch(`/lessons/${editing._id}`, payload);
 
-            setLessons((prev) =>
-                prev.map((l) => (l._id === editing._id ? { ...l, ...payload } : l))
-            );
-
+            setLessons((prev) => prev.map((l) => (l._id === editing._id ? { ...l, ...payload } : l)));
             await successToast("Saved!", "Lesson updated successfully.");
             closeEdit();
         } catch (err) {
             console.error(err);
-            Swal.fire({
-                icon: "error",
-                title: "Update failed",
-                text: err?.response?.data?.message || "Failed to update lesson",
-            });
+            failToast("Update failed", err?.response?.data?.message || "Failed to update lesson");
         } finally {
             setSaving(false);
         }
@@ -295,11 +308,7 @@ const ManageLessons = () => {
             <div className="bg-white border rounded-xl p-4 flex flex-col md:flex-row gap-3 md:items-center">
                 <div className="flex gap-2 items-center">
                     <span className="text-sm font-medium">Visibility</span>
-                    <select
-                        className="select select-sm select-bordered"
-                        value={visibility}
-                        onChange={(e) => setVisibility(e.target.value)}
-                    >
+                    <select className="select select-sm select-bordered" value={visibility} onChange={(e) => setVisibility(e.target.value)}>
                         <option value="all">All</option>
                         <option value="public">Public</option>
                         <option value="private">Private</option>
@@ -308,11 +317,7 @@ const ManageLessons = () => {
 
                 <div className="flex gap-2 items-center">
                     <span className="text-sm font-medium">Flagged</span>
-                    <select
-                        className="select select-sm select-bordered"
-                        value={flagged}
-                        onChange={(e) => setFlagged(e.target.value)}
-                    >
+                    <select className="select select-sm select-bordered" value={flagged} onChange={(e) => setFlagged(e.target.value)}>
                         <option value="all">All</option>
                         <option value="true">Flagged only</option>
                         <option value="false">Not flagged</option>
@@ -321,11 +326,7 @@ const ManageLessons = () => {
 
                 <div className="flex gap-2 items-center">
                     <span className="text-sm font-medium">Category</span>
-                    <select
-                        className="select select-sm select-bordered"
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                    >
+                    <select className="select select-sm select-bordered" value={category} onChange={(e) => setCategory(e.target.value)}>
                         {categories.map((c) => (
                             <option key={c} value={c}>
                                 {c || "All"}
@@ -358,7 +359,10 @@ const ManageLessons = () => {
 
                         <tbody>
                             {lessons.map((lesson) => {
-                                const busy = actionLoading === lesson._id || (editOpen && editing?._id === lesson._id && saving);
+                                const busy =
+                                    actionLoading === lesson._id ||
+                                    (editOpen && editing?._id === lesson._id && saving);
+
                                 const isPublic = lesson.visibility === "public";
 
                                 return (
@@ -367,7 +371,9 @@ const ManageLessons = () => {
                                             <p className="font-semibold">{lesson.title}</p>
                                             <p className="text-xs opacity-70">{lesson.creatorEmail}</p>
                                         </td>
+
                                         <td>{lesson.category || "—"}</td>
+
                                         <td>
                                             {isPublic ? (
                                                 <Badge className="bg-green-100 text-green-800">Public</Badge>
@@ -375,6 +381,7 @@ const ManageLessons = () => {
                                                 <Badge className="bg-gray-100 text-gray-800">Private</Badge>
                                             )}
                                         </td>
+
                                         <td>
                                             {lesson.isFeatured ? (
                                                 <Badge className="bg-orange-100 text-orange-800">Yes</Badge>
@@ -382,6 +389,7 @@ const ManageLessons = () => {
                                                 <span className="text-sm text-gray-500">No</span>
                                             )}
                                         </td>
+
                                         <td>
                                             {lesson.isReviewed ? (
                                                 <Badge className="bg-blue-100 text-blue-800">Reviewed</Badge>
@@ -441,13 +449,10 @@ const ManageLessons = () => {
                 </div>
             )}
 
-            {/* ===== Edit Modal ===== */}
+            {/* Edit Modal */}
             {editOpen && editing && (
                 <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={closeEdit}>
-                    <div
-                        className="bg-white rounded-xl max-w-2xl w-full border p-5"
-                        onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="bg-white rounded-xl max-w-2xl w-full border p-5" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-start justify-between gap-3 mb-4">
                             <div>
                                 <h3 className="text-lg font-semibold">Edit Lesson</h3>
@@ -547,10 +552,6 @@ const ManageLessons = () => {
                                     {saving ? "Saving..." : "Save Changes"}
                                 </button>
                             </div>
-
-                            <p className="text-xs text-gray-500">
-                                *Only lesson owners & admin can edit/delete (enforced by backend).
-                            </p>
                         </form>
                     </div>
                 </div>

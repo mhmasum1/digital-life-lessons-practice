@@ -19,7 +19,7 @@ const UserHome = () => {
     });
     const [error, setError] = useState("");
 
-    // ✅ hooks always on top (no conditional hooks)
+    // hooks always on top 
     useEffect(() => {
         if (!user?.email) return;
 
@@ -30,7 +30,6 @@ const UserHome = () => {
             setError("");
 
             try {
-                // ✅ Use your existing endpoints
                 const [myLessonsRes, favRes] = await Promise.all([
                     axiosSecure.get(`/lessons/my?email=${user.email}`),
                     axiosSecure.get(`/favorites`),
@@ -44,7 +43,7 @@ const UserHome = () => {
                 // recent 5 lessons
                 const recentLessons = myLessons.slice(0, 5);
 
-                // last 7 days chart (client-side calculate)
+                // last 7 days chart 
                 const now = new Date();
                 const start = new Date(now);
                 start.setDate(now.getDate() - 6);
@@ -116,7 +115,6 @@ const UserHome = () => {
                 )}
             </div>
 
-            {/* Stats cards (2 cards only) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-5">
                     <p className="text-sm text-gray-500">Total Lessons</p>
@@ -131,9 +129,8 @@ const UserHome = () => {
                 </div>
             </div>
 
-            {/* Chart + Recent */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Simple chart */}
+
                 <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-5">
                     <h3 className="text-lg font-semibold">Last 7 Days Activity</h3>
                     <p className="text-xs text-gray-500 mb-4">Lessons created per day</p>

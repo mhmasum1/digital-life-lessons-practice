@@ -11,13 +11,13 @@ const PublicLessons = () => {
     const [lessons, setLessons] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // ✅ controls
+    //controls
     const [search, setSearch] = useState("");
     const [category, setCategory] = useState("");
     const [tone, setTone] = useState("");
     const [sort, setSort] = useState("newest"); // newest | mostSaved
 
-    // ✅ pagination
+    //pagination
     const [page, setPage] = useState(1);
     const limit = 9; // per page
 
@@ -47,7 +47,7 @@ const PublicLessons = () => {
         return ["", ...Array.from(set)];
     }, [lessons]);
 
-    // ✅ filter change হলে page reset
+    // filter change then page reset
     useEffect(() => {
         setPage(1);
     }, [debouncedSearch, category, tone, sort]);
@@ -113,7 +113,6 @@ const PublicLessons = () => {
     const totalPages = Math.max(1, pagination.totalPages || 1);
 
     const pageNumbers = useMemo(() => {
-        // ছোট্ট clean pager (max 5 buttons)
         const current = page;
         const maxButtons = 5;
 
@@ -150,7 +149,7 @@ const PublicLessons = () => {
                     )}
                 </header>
 
-                {/* ✅ Search + Filter + Sort */}
+                {/* Search + Filter + Sort */}
                 <div className="bg-white border border-orange-100 rounded-2xl p-4 shadow-sm mb-6">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                         <div className="md:col-span-2">
@@ -229,7 +228,7 @@ const PublicLessons = () => {
                             ))}
                         </div>
 
-                        {/* ✅ Pagination */}
+                        {/*Pagination */}
                         <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-3">
                             <p className="text-xs text-gray-500">
                                 Page <span className="font-semibold">{page}</span> of{" "}

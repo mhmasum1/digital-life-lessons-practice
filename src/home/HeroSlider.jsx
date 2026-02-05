@@ -45,11 +45,9 @@ const HeroSlider = () => {
                         className={`absolute inset-0 transition-opacity duration-700 ${index === currentSlide ? "opacity-100" : "opacity-0"
                             }`}
                     >
-                        <div className={`h-full bg-gradient-to-r ${slide.bg} relative`}>
-                            {/* overlay for readability */}
+                        <div className={`h-full bg-linear-to-r ${slide.bg} relative`}>
                             <div className="absolute inset-0 bg-black/25" />
 
-                            {/* subtle pattern */}
                             <div
                                 className="absolute inset-0 opacity-20"
                                 style={{
@@ -60,7 +58,6 @@ const HeroSlider = () => {
                             />
 
                             <div className="relative h-full max-w-6xl mx-auto px-4 flex items-center">
-                                {/* Glass content card */}
                                 <div className="w-full md:w-[720px] rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md p-6 md:p-10 shadow-xl">
                                     <p className="text-white/90 text-xs md:text-sm tracking-widest uppercase mb-3">
                                         Digital Life Lessons

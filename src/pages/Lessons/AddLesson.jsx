@@ -18,7 +18,7 @@ const AddLesson = () => {
 
     const [submitting, setSubmitting] = useState(false);
 
-    // form state (radio controlled)
+    // form state 
     const [accessLevel, setAccessLevel] = useState("free");
     const [visibility, setVisibility] = useState("public");
 
@@ -70,7 +70,7 @@ const AddLesson = () => {
                 setAccessLevel("free");
                 setVisibility("public");
 
-                // ✅ show Lottie success overlay then redirect
+                // show Lottie success overlay then redirect
                 setShowSuccess(true);
 
                 setTimeout(() => {

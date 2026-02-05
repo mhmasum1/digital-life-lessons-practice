@@ -49,7 +49,7 @@ const LessonCard = ({ lesson, isPremiumUser }) => {
 
             {/* Card content */}
             <div className={isLocked ? "opacity-40 pointer-events-none" : ""}>
-                {/* Title + badges */}
+
                 <div className="flex items-start justify-between gap-4 mb-3">
                     <div>
                         <h2 className="text-base font-semibold text-gray-900 mb-1 line-clamp-2">
@@ -62,20 +62,18 @@ const LessonCard = ({ lesson, isPremiumUser }) => {
 
                     <span
                         className={`px-2 py-0.5 rounded-full text-[11px] border ${isPremiumLesson
-                                ? "bg-amber-50 text-amber-700 border-amber-200"
-                                : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                            : "bg-emerald-50 text-emerald-700 border-emerald-200"
                             }`}
                     >
                         {isPremiumLesson ? "Premium" : "Free"}
                     </span>
                 </div>
 
-                {/* Short description */}
                 <p className="text-sm text-gray-700 mb-3 line-clamp-3">
                     {lesson?.shortDescription}
                 </p>
 
-                {/* Author + meta */}
                 <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
                     <div className="flex items-center gap-2">
                         {lesson?.creatorPhotoURL ? (

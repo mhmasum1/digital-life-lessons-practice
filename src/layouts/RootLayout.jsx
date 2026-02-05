@@ -5,15 +5,10 @@ import Footer from "../components/footer/Footer";
 const RootLayout = () => {
     return (
         <div className="min-h-screen flex flex-col">
-            {/* Top Navbar */}
             <Navbar />
-
-            {/* Main content */}
             <main className="flex-1 max-w-6xl mx-auto px-4 py-6">
                 <Outlet />
             </main>
-
-            {/* Footer */}
             <Footer />
         </div>
     );

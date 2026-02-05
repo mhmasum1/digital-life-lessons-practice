@@ -170,7 +170,6 @@ const AdminHome = () => {
                     <MiniTable title="Most Active Contributors" rows={contributors} />
                 </div>
 
-                {/* ✅ Only one chart (User Growth removed) */}
                 <div className="lg:col-span-2">
                     <GrowthCard
                         title="Lesson Growth (last 30 days)"

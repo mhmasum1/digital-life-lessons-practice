@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
@@ -10,7 +10,7 @@ const MyFavorites = () => {
     const [loading, setLoading] = useState(true);
     const [favorites, setFavorites] = useState([]);
 
-    const loadFavorites = async () => {
+    const loadFavorites = useCallback(async () => {
         try {
             setLoading(true);
             const res = await axiosSecure.get("/favorites");
@@ -28,12 +28,11 @@ const MyFavorites = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [axiosSecure]);
 
     useEffect(() => {
         loadFavorites();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [loadFavorites]);
 
     const handleRemove = async (favoriteId) => {
         try {
@@ -53,10 +52,7 @@ const MyFavorites = () => {
             <div className="max-w-5xl mx-auto px-4 py-10">
                 <div className="flex items-center justify-between mb-6">
                     <h1 className="text-2xl font-semibold text-gray-900">My Favorites</h1>
-                    <Link
-                        to="/lessons"
-                        className="text-sm text-orange-600 hover:underline"
-                    >
+                    <Link to="/lessons" className="text-sm text-orange-600 hover:underline">
                         Browse lessons →
                     </Link>
                 </div>

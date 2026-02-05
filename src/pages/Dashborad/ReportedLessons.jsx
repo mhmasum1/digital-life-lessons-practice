@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 import Spinner from "../../components/common/Spinner";
 import toast from "react-hot-toast";
@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 
 const ReportedLessons = () => {
     const axiosSecure = useAxiosSecure();
+
     const [loading, setLoading] = useState(true);
     const [rows, setRows] = useState([]);
 
@@ -14,7 +15,7 @@ const ReportedLessons = () => {
 
     const [actionLoading, setActionLoading] = useState(null);
 
-    const load = async () => {
+    const load = useCallback(async () => {
         try {
             setLoading(true);
             const res = await axiosSecure.get("/admin/reported-lessons");
@@ -25,12 +26,11 @@ const ReportedLessons = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [axiosSecure]);
 
     useEffect(() => {
         load();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [axiosSecure]);
+    }, [load]);
 
     const openReasons = (row) => {
         setSelected(row);
@@ -58,7 +58,7 @@ const ReportedLessons = () => {
         try {
             setActionLoading(lessonId);
             await axiosSecure.delete(`/admin/reported-lessons/${lessonId}`);
-            setRows(prev => prev.filter(r => r.lessonId !== lessonId));
+            setRows((prev) => prev.filter((r) => r.lessonId !== lessonId));
             toast.success("Reports ignored");
             closeModal();
         } catch (e) {
@@ -68,7 +68,6 @@ const ReportedLessons = () => {
             setActionLoading(null);
         }
     };
-
 
     const deleteLessonAndReports = async (lessonId) => {
         const result = await Swal.fire({
@@ -87,7 +86,7 @@ const ReportedLessons = () => {
             setActionLoading(lessonId);
             await axiosSecure.delete(`/lessons/${lessonId}`);
             await axiosSecure.delete(`/admin/reported-lessons/${lessonId}`);
-            setRows(prev => prev.filter(r => r.lessonId !== lessonId));
+            setRows((prev) => prev.filter((r) => r.lessonId !== lessonId));
             toast.success("Lesson deleted");
             closeModal();
         } catch (e) {
@@ -97,7 +96,6 @@ const ReportedLessons = () => {
             setActionLoading(null);
         }
     };
-
 
     if (loading) return <Spinner />;
 
@@ -126,6 +124,7 @@ const ReportedLessons = () => {
                         <tbody>
                             {rows.map((r) => {
                                 const busy = actionLoading === r.lessonId;
+
                                 return (
                                     <tr key={r.lessonId}>
                                         <td>
@@ -137,10 +136,7 @@ const ReportedLessons = () => {
                                         <td className="text-center font-bold">{r.reportCount || 0}</td>
                                         <td className="text-right">
                                             <div className="flex justify-end gap-2 flex-wrap">
-                                                <button
-                                                    onClick={() => openReasons(r)}
-                                                    className="btn btn-xs bg-gray-900 text-white"
-                                                >
+                                                <button onClick={() => openReasons(r)} className="btn btn-xs bg-gray-900 text-white">
                                                     View Reasons
                                                 </button>
 
@@ -165,12 +161,10 @@ const ReportedLessons = () => {
                                 );
                             })}
                         </tbody>
-
                     </table>
                 </div>
             )}
 
-            {/* Modal */}
             {modalOpen && selected && (
                 <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={closeModal}>
                     <div className="bg-white rounded-xl max-w-2xl w-full border p-5" onClick={(e) => e.stopPropagation()}>
@@ -179,24 +173,22 @@ const ReportedLessons = () => {
                                 <h3 className="text-lg font-semibold">Report Reasons</h3>
                                 <p className="text-sm text-gray-600">{selected.lessonTitle || "Untitled Lesson"}</p>
                             </div>
-                            <button className="btn btn-sm" onClick={closeModal}>Close</button>
+                            <button className="btn btn-sm" onClick={closeModal}>
+                                Close
+                            </button>
                         </div>
 
                         <div className="space-y-2 max-h-[60vh] overflow-auto">
                             {(selected.reports || []).map((rep) => (
                                 <div key={rep._id} className="border rounded-lg p-3">
                                     <div className="flex items-center justify-between">
-                                        <p className="font-semibold text-sm">
-                                            {rep.reason || "Other"}
-                                        </p>
+                                        <p className="font-semibold text-sm">{rep.reason || "Other"}</p>
                                         <p className="text-xs opacity-60">
                                             {rep.createdAt ? new Date(rep.createdAt).toLocaleString() : ""}
                                         </p>
                                     </div>
 
-                                    {rep.message ? (
-                                        <p className="text-sm mt-1">{rep.message}</p>
-                                    ) : null}
+                                    {rep.message ? <p className="text-sm mt-1">{rep.message}</p> : null}
 
                                     <p className="text-xs opacity-70 mt-2">
                                         Reporter: {rep.reporterName || "Unknown"} ({rep.reporterEmail})
@@ -212,10 +204,7 @@ const ReportedLessons = () => {
                             >
                                 Delete Lesson
                             </button>
-                            <button
-                                className="btn btn-sm bg-gray-200"
-                                onClick={() => ignoreLessonReports(selected.lessonId)}
-                            >
+                            <button className="btn btn-sm bg-gray-200" onClick={() => ignoreLessonReports(selected.lessonId)}>
                                 Ignore Reports
                             </button>
                         </div>

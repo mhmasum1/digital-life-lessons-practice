@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import useAuth from "../../hooks/useAuth";
@@ -8,23 +8,25 @@ import Spinner from "../../components/common/Spinner";
 
 const MyLesson = () => {
     const { user } = useAuth();
-    const { dbUser, loadingUser } = useUserInfo(); // premium check
+    const { dbUser, loadingUser } = useUserInfo();
     const axiosSecure = useAxiosSecure();
 
     const isPremiumUser = dbUser?.isPremium === true;
 
     const [loading, setLoading] = useState(true);
     const [lessons, setLessons] = useState([]);
-    const [rowLoading, setRowLoading] = useState({}); // { [lessonId]: true }
+    const [rowLoading, setRowLoading] = useState({});
 
     const setThisRowLoading = (lessonId, value) => {
         setRowLoading((prev) => ({ ...prev, [lessonId]: value }));
     };
 
-    const fetchMyLessons = async () => {
+    const fetchMyLessons = useCallback(async () => {
+        if (!user?.email) return;
+
         try {
             setLoading(true);
-            const res = await axiosSecure.get(`/lessons/my?email=${user?.email}`);
+            const res = await axiosSecure.get(`/lessons/my?email=${user.email}`);
             setLessons(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error(err);
@@ -32,15 +34,15 @@ const MyLesson = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [axiosSecure, user?.email]);
+
 
     useEffect(() => {
-        if (!user?.email) return;
         fetchMyLessons();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user?.email]);
+    }, [fetchMyLessons]);
 
-    // ---------- Delete ----------
+
+    // Delete 
     const handleDelete = async (lessonId) => {
         const ok = window.confirm("Are you sure you want to delete this lesson?");
         if (!ok) return;
@@ -58,11 +60,10 @@ const MyLesson = () => {
         }
     };
 
-    // ---------- Update visibility ----------
+    // Update visibility 
     const handleVisibilityChange = async (lessonId, nextValue) => {
         const prevLessons = lessons;
 
-        // optimistic
         setLessons((prev) =>
             prev.map((l) => (l._id === lessonId ? { ...l, visibility: nextValue } : l))
         );
@@ -80,9 +81,9 @@ const MyLesson = () => {
         }
     };
 
-    // ---------- Update access level ----------
+    // Update access  
     const handleAccessChange = async (lessonId, nextValue) => {
-        // ✅ Premium gate: free user cannot set premium
+        // free user cannot set premium
         if (!isPremiumUser && nextValue === "premium") {
             toast.error("Upgrade to Premium to create Premium lessons");
             return;
@@ -172,7 +173,6 @@ const MyLesson = () => {
 
                                         <td className="p-3">{lesson.category || "-"}</td>
 
-                                        {/* ✅ Access dropdown (premium option disabled for free users) */}
                                         <td className="p-3">
                                             <select
                                                 className="border rounded-md px-2 py-1 text-xs bg-white"

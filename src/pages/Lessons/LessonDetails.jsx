@@ -23,11 +23,48 @@ const LessonDetails = () => {
     const [newComment, setNewComment] = useState("");
 
     const isPremiumUser = dbUser?.isPremium === true;
-
-    // Random views (static for this session)
     const [views] = useState(Math.floor(Math.random() * 10000));
 
-    // ========== Fetch Lesson ==========
+    const fetchSimilarLessons = async (category, tone) => {
+        try {
+            const res = await axiosSecure.get("/lessons/public");
+            const allLessons = res.data?.lessons || [];
+
+            const similar = allLessons
+                .filter(
+                    (l) =>
+                        l._id !== id &&
+                        (l.category === category || l.emotionalTone === tone)
+                )
+                .slice(0, 6);
+
+            setSimilarLessons(similar);
+        } catch (error) {
+            console.error("Failed to fetch similar lessons:", error);
+        }
+    };
+
+    const fetchAuthorStats = async (email) => {
+        try {
+            const res = await axiosSecure.get(`/lessons/my?email=${email}`);
+            setAuthorStats({ totalLessons: res.data?.length || 0 });
+        } catch (error) {
+            console.error("Failed to fetch author stats:", error);
+        }
+    };
+
+    const checkIfFavorited = async () => {
+        if (!user) return;
+        try {
+            const res = await axiosSecure.get("/favorites");
+            const favs = res.data?.favorites || [];
+            const isFav = favs.some((f) => f.lesson?._id === id);
+            setIsFavorited(isFav);
+        } catch (error) {
+            console.error("Failed to check favorites:", error);
+        }
+    };
+
     useEffect(() => {
         if (!id) return;
 
@@ -36,20 +73,15 @@ const LessonDetails = () => {
                 setLoading(true);
                 const res = await axiosSecure.get(`/lessons/${id}`);
                 const lessonData = res.data;
+
                 setLesson(lessonData);
 
-                // Check if user has liked
-                if (user && lessonData.likes?.includes(user.uid)) {
+                if (user && lessonData?.likes?.includes(user.uid)) {
                     setIsLiked(true);
                 }
 
-                // Fetch similar lessons
                 fetchSimilarLessons(lessonData.category, lessonData.emotionalTone);
-
-                // Fetch author stats
                 fetchAuthorStats(lessonData.creatorEmail);
-
-                // Check if favorited
                 checkIfFavorited();
             } catch (error) {
                 console.error("Failed to fetch lesson:", error);
@@ -62,51 +94,6 @@ const LessonDetails = () => {
         fetchLesson();
     }, [id, axiosSecure, user]);
 
-    // ========== Fetch Similar Lessons ==========
-    const fetchSimilarLessons = async (category, tone) => {
-        try {
-            const res = await axiosSecure.get("/lessons/public");
-            const allLessons = res.data.lessons || [];
-
-            const similar = allLessons
-                .filter(l =>
-                    l._id !== id &&
-                    (l.category === category || l.emotionalTone === tone)
-                )
-                .slice(0, 6);
-
-            setSimilarLessons(similar);
-        } catch (error) {
-            console.error("Failed to fetch similar lessons:", error);
-        }
-    };
-
-    // ========== Fetch Author Stats ==========
-    const fetchAuthorStats = async (email) => {
-        try {
-            const res = await axiosSecure.get(`/lessons/my?email=${email}`);
-            setAuthorStats({
-                totalLessons: res.data.length
-            });
-        } catch (error) {
-            console.error("Failed to fetch author stats:", error);
-        }
-    };
-
-    // ========== Check if Favorited ==========
-    const checkIfFavorited = async () => {
-        if (!user) return;
-        try {
-            const res = await axiosSecure.get("/favorites");
-            const favs = res.data.favorites || [];
-            const isFav = favs.some(f => f.lesson._id === id);
-            setIsFavorited(isFav);
-        } catch (error) {
-            console.error("Failed to check favorites:", error);
-        }
-    };
-
-    // ========== Toggle Favorite ==========
     const handleToggleFavorite = async () => {
         if (!user) {
             toast.error("Please log in to save favorites");
@@ -115,10 +102,9 @@ const LessonDetails = () => {
 
         try {
             if (isFavorited) {
-                // Remove from favorites
                 const res = await axiosSecure.get("/favorites");
-                const favs = res.data.favorites || [];
-                const fav = favs.find(f => f.lesson._id === id);
+                const favs = res.data?.favorites || [];
+                const fav = favs.find((f) => f.lesson?._id === id);
 
                 if (fav) {
                     await axiosSecure.delete(`/favorites/${fav._id}`);
@@ -126,7 +112,6 @@ const LessonDetails = () => {
                     toast.success("Removed from favorites");
                 }
             } else {
-                // Add to favorites
                 await axiosSecure.post("/favorites", { lessonId: id });
                 setIsFavorited(true);
                 toast.success("Added to favorites!");
@@ -137,7 +122,6 @@ const LessonDetails = () => {
         }
     };
 
-    // ========== Toggle Like ==========
     const handleToggleLike = async () => {
         if (!user) {
             toast.error("Please log in to like");
@@ -146,13 +130,12 @@ const LessonDetails = () => {
         }
 
         try {
-            // You need to create this backend route
             await axiosSecure.patch(`/lessons/${id}/like`);
 
-            setIsLiked(!isLiked);
-            setLesson(prev => ({
+            setIsLiked((prev) => !prev);
+            setLesson((prev) => ({
                 ...prev,
-                likesCount: prev.likesCount + (isLiked ? -1 : 1)
+                likesCount: (prev?.likesCount || 0) + (isLiked ? -1 : 1),
             }));
 
             toast.success(isLiked ? "Like removed" : "Liked!");
@@ -162,7 +145,6 @@ const LessonDetails = () => {
         }
     };
 
-    // ========== Report Lesson ==========
     const handleReport = async () => {
         if (!user) {
             toast.error("Please log in to report");
@@ -175,11 +157,12 @@ const LessonDetails = () => {
             "Misleading or False Information",
             "Spam or Promotional Content",
             "Sensitive or Disturbing Content",
-            "Other"
+            "Other",
         ];
 
-        const reason = prompt(`Select reason:\n${reasons.map((r, i) => `${i + 1}. ${r}`).join('\n')}`);
-
+        const reason = prompt(
+            `Select reason:\n${reasons.map((r, i) => `${i + 1}. ${r}`).join("\n")}`
+        );
         if (!reason) return;
 
         const message = prompt("Additional details (optional):");
@@ -188,7 +171,7 @@ const LessonDetails = () => {
             await axiosSecure.post("/reports", {
                 lessonId: id,
                 reason: reasons[parseInt(reason) - 1] || "Other",
-                message: message || ""
+                message: message || "",
             });
             toast.success("Report submitted. Thank you!");
         } catch (error) {
@@ -197,9 +180,9 @@ const LessonDetails = () => {
         }
     };
 
-    // ========== Post Comment ==========
     const handlePostComment = async (e) => {
         e.preventDefault();
+
         if (!user) {
             toast.error("Please log in to comment");
             return;
@@ -208,12 +191,11 @@ const LessonDetails = () => {
         if (!newComment.trim()) return;
 
         try {
-            // You need to create this backend route
             const res = await axiosSecure.post(`/lessons/${id}/comments`, {
-                comment: newComment
+                comment: newComment,
             });
 
-            setComments([...comments, res.data]);
+            setComments((prev) => [...prev, res.data]);
             setNewComment("");
             toast.success("Comment posted!");
         } catch (error) {
@@ -257,21 +239,21 @@ const LessonDetails = () => {
 
     const isPremiumLesson = accessLevel === "premium";
     const detailsText = (details || "").trim();
+
     const formattedDate = createdAt
         ? new Date(createdAt).toLocaleDateString()
         : "Recently";
+
     const formattedUpdated = updatedAt
         ? new Date(updatedAt).toLocaleDateString()
         : formattedDate;
 
-    // Estimated reading time
-    const wordCount = detailsText.split(/\s+/).length;
+    const wordCount = detailsText ? detailsText.split(/\s+/).length : 0;
     const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
     return (
         <div className="bg-[#FFF7ED] min-h-screen py-10 px-4">
             <div className="max-w-4xl mx-auto">
-                {/* Back Button */}
                 <button
                     onClick={() => navigate(-1)}
                     className="text-sm text-orange-600 hover:underline mb-6"
@@ -279,9 +261,7 @@ const LessonDetails = () => {
                     ← Back to lessons
                 </button>
 
-                {/* Main Card */}
                 <article className="bg-white rounded-2xl shadow-sm border border-orange-100 p-6 md:p-8 mb-6">
-                    {/* Header */}
                     <header className="mb-6">
                         <div className="flex items-center gap-2 mb-3 flex-wrap">
                             <span className="px-3 py-1 rounded-full bg-orange-50 text-orange-700 text-xs font-medium border border-orange-200">
@@ -305,7 +285,6 @@ const LessonDetails = () => {
                         </h1>
                     </header>
 
-                    {/* Metadata Section */}
                     <div className="bg-gray-50 rounded-lg p-4 mb-6 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                         <div>
                             <p className="text-gray-500 mb-1">Created</p>
@@ -325,14 +304,13 @@ const LessonDetails = () => {
                         </div>
                     </div>
 
-                    {/* Short Description */}
                     {shortDescription && (
                         <div className="bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 mb-6 text-sm text-gray-800">
-                            <strong className="text-orange-700">Summary:</strong> {shortDescription}
+                            <strong className="text-orange-700">Summary:</strong>{" "}
+                            {shortDescription}
                         </div>
                     )}
 
-                    {/* Premium Lock or Full Content */}
                     {isPremiumLesson && !isPremiumUser ? (
                         <div className="mt-4 border-2 border-dashed border-amber-300 bg-amber-50/60 rounded-xl px-6 py-8 text-center">
                             <div className="text-5xl mb-3">🔒</div>
@@ -340,7 +318,8 @@ const LessonDetails = () => {
                                 This is a Premium Life Lesson
                             </p>
                             <p className="text-sm text-amber-700 mb-4 max-w-md mx-auto">
-                                Upgrade to Premium to unlock the full story and all future premium lessons.
+                                Upgrade to Premium to unlock the full story and all future
+                                premium lessons.
                             </p>
                             <Link
                                 to="/pricing"
@@ -353,16 +332,19 @@ const LessonDetails = () => {
                         <section className="prose prose-sm md:prose-base max-w-none text-gray-800 leading-relaxed mb-6">
                             {detailsText ? (
                                 detailsText.split("\n").map((para, idx) => (
-                                    <p key={idx} className="mb-4">{para}</p>
+                                    <p key={idx} className="mb-4">
+                                        {para}
+                                    </p>
                                 ))
                             ) : (
-                                <p className="text-gray-600 italic">No detailed content provided.</p>
+                                <p className="text-gray-600 italic">
+                                    No detailed content provided.
+                                </p>
                             )}
                         </section>
                     )}
                 </article>
 
-                {/* Author Section */}
                 <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-6 mb-6">
                     <h3 className="text-lg font-semibold mb-4">About the Author</h3>
                     <div className="flex items-center gap-4">
@@ -377,6 +359,7 @@ const LessonDetails = () => {
                                 {(creatorName?.[0] || "U").toUpperCase()}
                             </div>
                         )}
+
                         <div className="flex-1">
                             <h4 className="font-semibold text-gray-900">{creatorName}</h4>
                             <p className="text-sm text-gray-600">{creatorEmail}</p>
@@ -386,6 +369,7 @@ const LessonDetails = () => {
                                 </p>
                             )}
                         </div>
+
                         <Link
                             to={`/profile/${creatorEmail}`}
                             className="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg text-sm font-medium hover:bg-orange-200 transition"
@@ -395,7 +379,6 @@ const LessonDetails = () => {
                     </div>
                 </div>
 
-                {/* Stats & Engagement */}
                 <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-6 mb-6">
                     <div className="grid grid-cols-3 gap-4 text-center">
                         <div>
@@ -403,7 +386,9 @@ const LessonDetails = () => {
                             <p className="text-xs text-gray-600">Likes</p>
                         </div>
                         <div>
-                            <p className="text-2xl font-bold text-orange-500">🔖 {savedCount}</p>
+                            <p className="text-2xl font-bold text-orange-500">
+                                🔖 {savedCount}
+                            </p>
                             <p className="text-xs text-gray-600">Favorites</p>
                         </div>
                         <div>
@@ -413,7 +398,6 @@ const LessonDetails = () => {
                     </div>
                 </div>
 
-                {/* Interaction Buttons */}
                 <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-6 mb-6">
                     <div className="flex flex-wrap gap-3">
                         <button
@@ -455,7 +439,6 @@ const LessonDetails = () => {
                     </div>
                 </div>
 
-                {/* Comment Section */}
                 <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-6 mb-6">
                     <h3 className="text-lg font-semibold mb-4">Comments</h3>
 
@@ -477,7 +460,14 @@ const LessonDetails = () => {
                         </form>
                     ) : (
                         <p className="text-gray-600 mb-6 text-sm">
-                            Please <Link to="/auth/login" className="text-orange-600 hover:underline">log in</Link> to comment.
+                            Please{" "}
+                            <Link
+                                to="/auth/login"
+                                className="text-orange-600 hover:underline"
+                            >
+                                log in
+                            </Link>{" "}
+                            to comment.
                         </p>
                     )}
 
@@ -495,7 +485,6 @@ const LessonDetails = () => {
                     )}
                 </div>
 
-                {/* Similar Lessons */}
                 {similarLessons.length > 0 && (
                     <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-6">
                         <h3 className="text-lg font-semibold mb-4">Similar Lessons</h3>

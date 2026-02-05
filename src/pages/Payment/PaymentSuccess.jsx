@@ -15,7 +15,7 @@ const PaymentSuccess = () => {
             .patch(`/payment-success?session_id=${sessionId}`)
             .then((res) => {
                 setTransactionId(res.data.transactionId || "");
-                // ✅ Premium instantly navbar এ দেখাতে event fire
+
                 window.dispatchEvent(new Event("premium-updated"));
             })
             .catch((err) => console.error(err));

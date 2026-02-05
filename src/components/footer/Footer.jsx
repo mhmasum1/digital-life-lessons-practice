@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { FaFacebook, FaTwitter, FaInstagram, FaYoutube } from "react-icons/fa";
+import logo from "../../assets/Logo.webp";
+
 
 const Footer = () => {
     return (
@@ -8,13 +10,17 @@ const Footer = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
                     <div className="flex items-center gap-3">
-                        <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-white font-bold text-lg shadow-sm">
-                            DL
-                        </span>
+                        <img
+                            src={logo}
+                            alt="Digital Life Lessons"
+                            className="h-10 w-10 rounded-2xl object-contain"
+                        />
                         <div>
                             <h2 className="font-semibold text-lg text-gray-900">Digital Life Lessons</h2>
+                            <p className="text-xs text-gray-500">Learn • Share • Grow</p>
                         </div>
                     </div>
+
 
 
                     <div>
@@ -38,20 +44,24 @@ const Footer = () => {
                 <div className="flex justify-between items-center mt-10 border-t border-orange-100 pt-5">
                     <p className="text-gray-500 text-sm">© {new Date().getFullYear()} Digital Life Lessons. All rights reserved.</p>
 
-                    <div className="flex gap-4 text-xl text-gray-600">
-                        <a href="https://facebook.com" target="_blank" rel="noreferrer" className="hover:text-primary">
+                    <div className="flex gap-4 text-xl text-gray-500">
+                        <span className="cursor-pointer transition hover:text-blue-600">
                             <FaFacebook />
-                        </a>
-                        <a href="https://twitter.com" target="_blank" rel="noreferrer" className="hover:text-primary">
+                        </span>
+
+                        <span className="cursor-pointer transition hover:text-sky-500">
                             <FaTwitter />
-                        </a>
-                        <a href="https://instagram.com" target="_blank" rel="noreferrer" className="hover:text-primary">
+                        </span>
+
+                        <span className="cursor-pointer transition hover:text-pink-500">
                             <FaInstagram />
-                        </a>
-                        <a href="https://youtube.com" target="_blank" rel="noreferrer" className="hover:text-primary">
+                        </span>
+
+                        <span className="cursor-pointer transition hover:text-red-600">
                             <FaYoutube />
-                        </a>
+                        </span>
                     </div>
+
                 </div>
             </div>
         </footer>

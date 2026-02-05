@@ -2,6 +2,8 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import useRole from "../../hooks/useRole";
 import useUserInfo from "../../hooks/useUserInfo";
+import logo from "../../assets/Logo.webp";
+
 
 const NavBar = () => {
     const { user, logOut } = useAuth();
@@ -33,9 +35,9 @@ const NavBar = () => {
 
     return (
         <div className="navbar bg-base-100 shadow-sm px-3">
-            {/* LEFT: logo + mobile menu */}
+            {/* mobile menu */}
             <div className="navbar-start">
-                {/* Mobile dropdown */}
+                {/*  dropdown */}
                 <div className="dropdown">
                     <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden btn-sm">
                         <svg
@@ -104,7 +106,7 @@ const NavBar = () => {
                             </>
                         )}
 
-                        {/* ADMIN links */}
+                        {/* ADMIN link */}
                         {user && isAdmin && (
                             <li>
                                 <button
@@ -118,12 +120,19 @@ const NavBar = () => {
                     </ul>
                 </div>
 
-                <Link to="/" className="btn btn-ghost text-xl">
-                    DIG LIFE
+                <Link to="/" className="flex items-center gap-2">
+                    <img
+                        src={logo}
+                        alt="Digital Life Lessons"
+                        className="h-9 w-9 rounded-xl object-contain"
+                    />
+                    <span className="text-lg font-bold tracking-tight text-gray-900">
+                        Digital Life <span className="text-orange-500">Lessons</span>
+                    </span>
                 </Link>
+
             </div>
 
-            {/* CENTER: desktop menu */}
             <div className="navbar-center hidden lg:flex">
                 <ul className="flex items-center gap-1">
                     <li>
@@ -138,7 +147,7 @@ const NavBar = () => {
                         </NavLink>
                     </li>
 
-                    {/* USER links */}
+                    {/* USER link */}
                     {user && !isAdmin && (
                         <>
                             <li>
@@ -179,7 +188,7 @@ const NavBar = () => {
                         </>
                     )}
 
-                    {/* ADMIN links */}
+                    {/* ADMIN link */}
                     {user && isAdmin && (
                         <li>
                             <button
@@ -193,7 +202,7 @@ const NavBar = () => {
                 </ul>
             </div>
 
-            {/* RIGHT: badges + auth */}
+            {/*auth */}
             <div className="navbar-end gap-2">
                 {/* Premium badge only for normal user */}
                 {user && !isAdmin && !loadingUser && isPremium && (
@@ -210,7 +219,6 @@ const NavBar = () => {
                     </div>
                 )}
 
-                {/* If not logged in */}
                 {!user ? (
                     <div className="flex items-center gap-2">
                         <Link className="btn btn-primary btn-sm" to="/login">

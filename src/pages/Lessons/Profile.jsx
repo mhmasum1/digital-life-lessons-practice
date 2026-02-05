@@ -55,12 +55,10 @@ const Profile = () => {
     }, [user?.email, axiosSecure]);
 
     const totalCreated = useMemo(() => {
-        // dbUser থেকে stats না থাকলে fallback: public lessons length
         return myPublicLessons.length;
     }, [myPublicLessons]);
 
     const totalSaved = useMemo(() => {
-        // তোমার stats endpoint ব্যবহার করলে এখানে বসাতে পারো
         return dbUser?.savedCount ?? dbUser?.totalFavorites ?? null;
     }, [dbUser]);
 
@@ -76,7 +74,6 @@ const Profile = () => {
 
             let photoURL = user?.photoURL || dbUser?.photoURL || "";
 
-            // ✅ if user selected new photo -> upload to imgbb
             if (photoFile) {
                 const key = import.meta.env.VITE_photo_host_key; // your env key name
                 if (!key) {
@@ -93,13 +90,13 @@ const Profile = () => {
                 photoURL = uploadRes?.data?.data?.url || photoURL;
             }
 
-            // ✅ Update Firebase profile
+            //Update Firebase profile
             await updateUserProfile({
                 displayName: finalName,
                 photoURL,
             });
 
-            // ✅ Update DB user (upsert)
+            //Update DB user 
             await axiosSecure.post("/users", {
                 email: user.email,
                 displayName: finalName,
@@ -120,7 +117,6 @@ const Profile = () => {
 
     return (
         <div className="p-4 md:p-6 space-y-6">
-            {/* Header */}
             <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-semibold">My Profile</h1>
@@ -139,7 +135,6 @@ const Profile = () => {
 
             {/* Profile card */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {/* Left: info */}
                 <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-5">
                     <div className="flex items-center gap-3">
                         {user?.photoURL ? (
@@ -179,7 +174,7 @@ const Profile = () => {
                     </div>
                 </div>
 
-                {/* Right: update form */}
+                {/* update form */}
                 <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-orange-100 p-5">
                     <h2 className="text-lg font-semibold mb-3">Update Profile</h2>
 

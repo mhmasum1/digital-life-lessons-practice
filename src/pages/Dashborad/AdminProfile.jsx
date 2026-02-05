@@ -119,7 +119,6 @@ const AdminProfile = () => {
                         <p className="text-lg font-bold">Administrator</p>
                     </div>
 
-                    {/* Optional Summary (placeholder) */}
                     <div className="mt-4 grid grid-cols-2 gap-3">
                         <div className="rounded-lg border p-3">
                             <p className="text-xs text-gray-500">Moderated</p>
@@ -132,7 +131,6 @@ const AdminProfile = () => {
                     </div>
 
                     <p className="text-xs text-gray-500 mt-3">
-                        *Optional stats later add করতে চাইলে backend এ admin actions log রাখতে হবে।
                     </p>
                 </div>
 
