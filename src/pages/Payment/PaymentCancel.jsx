@@ -5,7 +5,7 @@ const PaymentCancelled = () => {
     return (
         <div>
             <h2>Payment is cancelled. Please try again</h2>
-            <Link to="/dashboard/my-parcels">
+            <Link to="/pricing">
                 <button className='btn btn-primary text-black'>Try Again</button></Link>
         </div>
     );
