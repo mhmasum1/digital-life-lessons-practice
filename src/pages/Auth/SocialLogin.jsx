@@ -24,7 +24,7 @@ const SocialLogin = () => {
 
                 axiosSecure.post('/users', userInfo)
                     .then(res => {
-                        // console.log('user data has been stored', res.data)
+                        console.log('user data has been stored', res.data)
                         navigate(location.state || '/');
                     })
 
