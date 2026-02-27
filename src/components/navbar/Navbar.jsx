@@ -4,7 +4,6 @@ import useRole from "../../hooks/useRole";
 import useUserInfo from "../../hooks/useUserInfo";
 import logo from "../../assets/Logo.webp";
 
-
 const NavBar = () => {
     const { user, logOut } = useAuth();
     const { role, roleLoading } = useRole();
@@ -34,10 +33,8 @@ const NavBar = () => {
     const avatarLetter = (user?.displayName?.[0] || user?.email?.[0] || "U").toUpperCase();
 
     return (
-        <div className="navbar bg-base-100 shadow-sm px-3">
-            {/* mobile menu */}
+        <div className="navbar bg-base-100 shadow-sm px-3 sticky top-0 z-50">
             <div className="navbar-start">
-                {/*  dropdown */}
                 <div className="dropdown">
                     <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden btn-sm">
                         <svg
@@ -51,7 +48,6 @@ const NavBar = () => {
                         </svg>
                     </div>
 
-                    {/* Mobile menu items */}
                     <ul tabIndex={0} className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-60 p-2 shadow">
                         <li>
                             <NavLink to="/" end className={linkClass}>
@@ -65,7 +61,18 @@ const NavBar = () => {
                             </NavLink>
                         </li>
 
-                        {/* USER links */}
+                        <li>
+                            <NavLink to="/contact" className={linkClass}>
+                                Contact Us
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink to="/about" className={linkClass}>
+                                About
+                            </NavLink>
+                        </li>
+
                         {user && !isAdmin && (
                             <>
                                 <li>
@@ -73,7 +80,7 @@ const NavBar = () => {
                                         className="text-left px-3 py-2 text-sm font-medium text-gray-700 hover:text-orange-600"
                                         onClick={() => goProtected("/pricing")}
                                     >
-                                        Pricing / Upgrade
+                                        Pricing
                                     </button>
                                 </li>
 
@@ -106,7 +113,6 @@ const NavBar = () => {
                             </>
                         )}
 
-                        {/* ADMIN link */}
                         {user && isAdmin && (
                             <li>
                                 <button
@@ -121,16 +127,11 @@ const NavBar = () => {
                 </div>
 
                 <Link to="/" className="flex items-center gap-2">
-                    <img
-                        src={logo}
-                        alt="Digital Life Lessons"
-                        className="h-9 w-9 rounded-xl object-contain"
-                    />
+                    <img src={logo} alt="Digital Life Lessons" className="h-9 w-9 rounded-xl object-contain" />
                     <span className="text-lg font-bold tracking-tight text-gray-900">
                         Digital Life <span className="text-orange-500">Lessons</span>
                     </span>
                 </Link>
-
             </div>
 
             <div className="navbar-center hidden lg:flex">
@@ -147,7 +148,18 @@ const NavBar = () => {
                         </NavLink>
                     </li>
 
-                    {/* USER link */}
+                    <li>
+                        <NavLink to="/contact" className={linkClass}>
+                            Contact Us
+                        </NavLink>
+                    </li>
+
+                    <li>
+                        <NavLink to="/about" className={linkClass}>
+                            About
+                        </NavLink>
+                    </li>
+
                     {user && !isAdmin && (
                         <>
                             <li>
@@ -155,7 +167,7 @@ const NavBar = () => {
                                     className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-orange-600"
                                     onClick={() => goProtected("/pricing")}
                                 >
-                                    Pricing / Upgrade
+                                    Pricing
                                 </button>
                             </li>
 
@@ -188,7 +200,6 @@ const NavBar = () => {
                         </>
                     )}
 
-                    {/* ADMIN link */}
                     {user && isAdmin && (
                         <li>
                             <button
@@ -202,9 +213,7 @@ const NavBar = () => {
                 </ul>
             </div>
 
-            {/*auth */}
             <div className="navbar-end gap-2">
-                {/* Premium badge only for normal user */}
                 {user && !isAdmin && !loadingUser && isPremium && (
                     <div className="badge badge-warning gap-1 px-2 py-1 text-xs">
                         <span>⭐</span>
@@ -212,7 +221,6 @@ const NavBar = () => {
                     </div>
                 )}
 
-                {/* Admin badge */}
                 {user && isAdmin && (
                     <div className="badge badge-error px-2 py-1 text-xs text-white font-semibold">
                         Admin
@@ -256,23 +264,14 @@ const NavBar = () => {
 
                             <div className="divider my-1" />
 
-                            {/* Profile */}
                             <li>
-                                <button
-                                    onClick={() =>
-                                        navigate(isAdmin ? "/dashboard/admin/profile" : "/dashboard/profile")
-                                    }
-                                >
+                                <button onClick={() => navigate(isAdmin ? "/dashboard/admin/profile" : "/dashboard/profile")}>
                                     {isAdmin ? "Admin Profile" : "Profile"}
                                 </button>
                             </li>
 
-                            {/* Dashboard */}
                             <li>
-                                <button
-                                    disabled={roleLoading}
-                                    onClick={() => navigate(isAdmin ? "/dashboard/admin" : "/dashboard")}
-                                >
+                                <button disabled={roleLoading} onClick={() => navigate(isAdmin ? "/dashboard/admin" : "/dashboard")}>
                                     {isAdmin ? "Admin Dashboard" : "Dashboard"}
                                 </button>
                             </li>

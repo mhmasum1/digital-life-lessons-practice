@@ -19,7 +19,7 @@ const TopContributors = ({ contributors }) => {
                         <p className="text-sm text-gray-700">No contributors yet.</p>
                     </div>
                 ) : (
-                    <div className="grid gap-5 md:grid-cols-3">
+                    <div className="grid gap-5 md:grid-cols-4">
                         {safe.map((user) => {
                             const name = user.name || "Unknown";
                             const photo = user.photoURL || user.avatar || "";

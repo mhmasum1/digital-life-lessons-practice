@@ -32,6 +32,8 @@ import AdminHome from "../pages/Dashborad/AdminHome.jsx";
 import ManageUsers from "../pages/Dashborad/ManageUsers.jsx";
 import Profile from "../pages/Lessons/Profile.jsx";
 import AdminProfile from "../pages/Dashborad/AdminProfile.jsx";
+import Contact from "../components/navbar/Contact.jsx";
+import About from "../components/navbar/About.jsx";
 
 const router = createBrowserRouter([
     {
@@ -43,6 +45,8 @@ const router = createBrowserRouter([
 
             // lessons
             { path: "lessons", element: <PublicLessons /> },
+            { path: "contact", element: <Contact /> },
+            { path: "about", element: <About /> },
             {
                 path: "lessons/:id",
                 element: (
