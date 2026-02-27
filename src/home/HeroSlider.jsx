@@ -1,30 +1,35 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const HeroSlider = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
 
-    const slides = [
-        {
-            title: "Learn Life's Most Valuable Lessons",
-            subtitle: "Discover wisdom from real experiences shared by people around the world",
-            bg: "from-orange-500 via-rose-500 to-pink-500",
-            cta: "/lessons",
-        },
-        {
-            title: "Share Your Story, Inspire Others",
-            subtitle: "Your life experiences can guide someone through their journey",
-            bg: "from-purple-500 via-fuchsia-500 to-indigo-500",
-            cta: "/dashboard/add-lesson",
-        },
-        {
-            title: "Build Better Habits, Transform Your Life",
-            subtitle: "Access practical lessons that make a real difference in daily living",
-            bg: "from-sky-500 via-cyan-500 to-emerald-500",
-            cta: "/lessons",
-        },
-    ];
+    const slides = useMemo(
+        () => [
+            {
+                title: "Learn Life's Most Valuable Lessons",
+                subtitle:
+                    "Discover wisdom from real experiences shared by people around the world",
+                bg: "from-orange-500 via-rose-500 to-pink-500",
+                cta: "/lessons",
+            },
+            {
+                title: "Share Your Story, Inspire Others",
+                subtitle: "Your life experiences can guide someone through their journey",
+                bg: "from-purple-500 via-fuchsia-500 to-indigo-500",
+                cta: "/dashboard/add-lesson",
+            },
+            {
+                title: "Build Better Habits, Transform Your Life",
+                subtitle:
+                    "Access practical lessons that make a real difference in daily living",
+                bg: "from-sky-500 via-cyan-500 to-emerald-500",
+                cta: "/lessons",
+            },
+        ],
+        []
+    );
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -34,7 +39,8 @@ const HeroSlider = () => {
     }, [slides.length]);
 
     const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
-    const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    const prevSlide = () =>
+        setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
 
     return (
         <section className="relative overflow-hidden">
@@ -72,16 +78,13 @@ const HeroSlider = () => {
                                     </p>
 
                                     <div className="mt-7 flex flex-wrap gap-3">
-                                        <Link
-                                            to={slide.cta}
-                                            className="bg-white text-gray-900 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition"
-                                        >
+                                        <Link to={slide.cta} className="btn btn-primary rounded-xl">
                                             Explore Lessons
                                         </Link>
 
                                         <Link
                                             to="/pricing"
-                                            className="px-6 py-3 rounded-xl font-semibold border border-white/40 text-white hover:bg-white/15 transition"
+                                            className="btn rounded-xl bg-transparent text-white border border-white/50 hover:bg-white/15 hover:border-white/70"
                                         >
                                             Go Premium
                                         </Link>
@@ -92,7 +95,6 @@ const HeroSlider = () => {
                     </div>
                 ))}
 
-                {/* arrows */}
                 <button
                     onClick={prevSlide}
                     className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/25 hover:bg-white/40 backdrop-blur text-white p-3 rounded-full transition"
@@ -109,7 +111,6 @@ const HeroSlider = () => {
                     <ChevronRight size={22} />
                 </button>
 
-                {/* dots */}
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
                     {slides.map((_, index) => (
                         <button

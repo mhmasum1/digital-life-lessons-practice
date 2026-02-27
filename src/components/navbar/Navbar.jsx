@@ -13,7 +13,7 @@ const NavBar = () => {
     const isAdmin = !!user && !roleLoading && role === "admin";
 
     const linkClass = ({ isActive }) =>
-        `px-3 py-2 rounded-md text-sm font-medium ${isActive ? "text-orange-600" : "text-gray-700 hover:text-orange-600"
+        `px-3 py-2 rounded-md text-sm font-medium transition ${isActive ? "text-primary" : "text-base-content/70 hover:text-primary"
         }`;
 
     const goProtected = (path) => {
@@ -30,10 +30,25 @@ const NavBar = () => {
         }
     };
 
-    const avatarLetter = (user?.displayName?.[0] || user?.email?.[0] || "U").toUpperCase();
+    const avatarLetter = (
+        user?.displayName?.[0] ||
+        user?.email?.[0] ||
+        "U"
+    ).toUpperCase();
+
+    const handleToggleTheme = () => {
+        const root = document.documentElement;
+        const current = root.getAttribute("data-theme") || "light";
+        const next = current === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        localStorage.setItem("theme", next);
+    };
+
+    const savedTheme =
+        (typeof window !== "undefined" && localStorage.getItem("theme")) || "light";
 
     return (
-        <div className="navbar bg-base-100 shadow-sm px-3 sticky top-0 z-50">
+        <div className="navbar bg-base-100 text-base-content shadow-sm px-3 sticky top-0 z-50 border-b border-base-300">
             <div className="navbar-start">
                 <div className="dropdown">
                     <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden btn-sm">
@@ -44,11 +59,19 @@ const NavBar = () => {
                             viewBox="0 0 24 24"
                             stroke="currentColor"
                         >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M4 6h16M4 12h8m-8 6h16"
+                            />
                         </svg>
                     </div>
 
-                    <ul tabIndex={0} className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-60 p-2 shadow">
+                    <ul
+                        tabIndex={0}
+                        className="menu menu-sm dropdown-content bg-base-100 text-base-content border border-base-300 rounded-box z-50 mt-3 w-60 p-2 shadow"
+                    >
                         <li>
                             <NavLink to="/" end className={linkClass}>
                                 Home
@@ -77,7 +100,7 @@ const NavBar = () => {
                             <>
                                 <li>
                                     <button
-                                        className="text-left px-3 py-2 text-sm font-medium text-gray-700 hover:text-orange-600"
+                                        className="text-left px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary"
                                         onClick={() => goProtected("/pricing")}
                                     >
                                         Pricing
@@ -86,7 +109,7 @@ const NavBar = () => {
 
                                 <li>
                                     <button
-                                        className="text-left px-3 py-2 text-sm font-medium text-gray-700 hover:text-orange-600"
+                                        className="text-left px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary"
                                         onClick={() => goProtected("/dashboard/add-lesson")}
                                     >
                                         Add Lesson
@@ -95,7 +118,7 @@ const NavBar = () => {
 
                                 <li>
                                     <button
-                                        className="text-left px-3 py-2 text-sm font-medium text-gray-700 hover:text-orange-600"
+                                        className="text-left px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary"
                                         onClick={() => goProtected("/dashboard/my-lessons")}
                                     >
                                         My Lessons
@@ -104,7 +127,7 @@ const NavBar = () => {
 
                                 <li>
                                     <button
-                                        className="text-left px-3 py-2 text-sm font-medium text-gray-700 hover:text-orange-600"
+                                        className="text-left px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary"
                                         onClick={() => goProtected("/dashboard")}
                                     >
                                         Dashboard
@@ -116,7 +139,7 @@ const NavBar = () => {
                         {user && isAdmin && (
                             <li>
                                 <button
-                                    className="text-left px-3 py-2 text-sm font-medium text-gray-700 hover:text-orange-600"
+                                    className="text-left px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary"
                                     onClick={() => goProtected("/dashboard/admin")}
                                 >
                                     Admin Dashboard
@@ -128,8 +151,8 @@ const NavBar = () => {
 
                 <Link to="/" className="flex items-center gap-2">
                     <img src={logo} alt="Digital Life Lessons" className="h-9 w-9 rounded-xl object-contain" />
-                    <span className="text-lg font-bold tracking-tight text-gray-900">
-                        Digital Life <span className="text-orange-500">Lessons</span>
+                    <span className="text-lg font-bold tracking-tight text-base-content">
+                        Digital Life <span className="text-primary">Lessons</span>
                     </span>
                 </Link>
             </div>
@@ -164,7 +187,7 @@ const NavBar = () => {
                         <>
                             <li>
                                 <button
-                                    className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-orange-600"
+                                    className="px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary"
                                     onClick={() => goProtected("/pricing")}
                                 >
                                     Pricing
@@ -173,7 +196,7 @@ const NavBar = () => {
 
                             <li>
                                 <button
-                                    className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-orange-600"
+                                    className="px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary"
                                     onClick={() => goProtected("/dashboard/add-lesson")}
                                 >
                                     Add Lesson
@@ -182,7 +205,7 @@ const NavBar = () => {
 
                             <li>
                                 <button
-                                    className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-orange-600"
+                                    className="px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary"
                                     onClick={() => goProtected("/dashboard/my-lessons")}
                                 >
                                     My Lessons
@@ -191,7 +214,7 @@ const NavBar = () => {
 
                             <li>
                                 <button
-                                    className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-orange-600"
+                                    className="px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary"
                                     onClick={() => goProtected("/dashboard")}
                                 >
                                     Dashboard
@@ -203,7 +226,7 @@ const NavBar = () => {
                     {user && isAdmin && (
                         <li>
                             <button
-                                className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-orange-600"
+                                className="px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary"
                                 onClick={() => goProtected("/dashboard/admin")}
                             >
                                 Admin Dashboard
@@ -214,10 +237,20 @@ const NavBar = () => {
             </div>
 
             <div className="navbar-end gap-2">
+                <button
+                    type="button"
+                    onClick={handleToggleTheme}
+                    className="btn btn-outline btn-sm"
+                    aria-label="Toggle theme"
+                    title="Toggle theme"
+                >
+                    Theme
+                </button>
+
                 {user && !isAdmin && !loadingUser && isPremium && (
                     <div className="badge badge-warning gap-1 px-2 py-1 text-xs">
                         <span>⭐</span>
-                        <span className="font-semibold">Premium</span>
+                        {/* <span className="font-semibold">Premium</span> */}
                     </div>
                 )}
 
@@ -243,35 +276,47 @@ const NavBar = () => {
                                 <img
                                     src={user.photoURL}
                                     alt="avatar"
-                                    className="w-9 h-9 rounded-full object-cover border"
+                                    className="w-9 h-9 rounded-full object-cover border border-base-300"
                                     referrerPolicy="no-referrer"
                                 />
                             ) : (
-                                <div className="w-9 h-9 rounded-full border flex items-center justify-center font-semibold">
+                                <div className="w-9 h-9 rounded-full border border-base-300 flex items-center justify-center font-semibold">
                                     {avatarLetter}
                                 </div>
                             )}
-                            <span className="hidden md:inline text-sm font-semibold">
+                            <span className="hidden md:inline text-sm font-semibold text-base-content">
                                 {user?.displayName || (isAdmin ? "Admin" : "User")}
                             </span>
                         </div>
 
-                        <ul tabIndex={0} className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-64 p-3 shadow">
+                        <ul
+                            tabIndex={0}
+                            className="menu menu-sm dropdown-content bg-base-100 text-base-content border border-base-300 rounded-box z-50 mt-3 w-64 p-3 shadow"
+                        >
                             <li className="px-2 py-1">
-                                <p className="font-semibold">{user?.displayName || (isAdmin ? "Admin" : "User")}</p>
+                                <p className="font-semibold">
+                                    {user?.displayName || (isAdmin ? "Admin" : "User")}
+                                </p>
                                 <p className="text-xs opacity-60">{user?.email}</p>
                             </li>
 
                             <div className="divider my-1" />
 
                             <li>
-                                <button onClick={() => navigate(isAdmin ? "/dashboard/admin/profile" : "/dashboard/profile")}>
+                                <button
+                                    onClick={() =>
+                                        navigate(isAdmin ? "/dashboard/admin/profile" : "/dashboard/profile")
+                                    }
+                                >
                                     {isAdmin ? "Admin Profile" : "Profile"}
                                 </button>
                             </li>
 
                             <li>
-                                <button disabled={roleLoading} onClick={() => navigate(isAdmin ? "/dashboard/admin" : "/dashboard")}>
+                                <button
+                                    disabled={roleLoading}
+                                    onClick={() => navigate(isAdmin ? "/dashboard/admin" : "/dashboard")}
+                                >
                                     {isAdmin ? "Admin Dashboard" : "Dashboard"}
                                 </button>
                             </li>
@@ -279,7 +324,7 @@ const NavBar = () => {
                             <div className="divider my-1" />
 
                             <li>
-                                <button onClick={handleLogOut} className="text-red-600">
+                                <button onClick={handleLogOut} className="text-error">
                                     Log out
                                 </button>
                             </li>
@@ -287,6 +332,14 @@ const NavBar = () => {
                     </div>
                 )}
             </div>
+
+            {typeof window !== "undefined" && !document.documentElement.getAttribute("data-theme") && (
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `document.documentElement.setAttribute("data-theme", "${savedTheme}");`,
+                    }}
+                />
+            )}
         </div>
     );
 };
