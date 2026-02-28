@@ -8,7 +8,13 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 
 const Profile = () => {
-    const { user, updateUserProfile } = useAuth();
+    const {
+        user,
+        updateUserProfile,
+        reauthenticateUser,
+        changeUserPassword,
+    } = useAuth();
+
     const { dbUser, loadingUser, isPremium } = useUserInfo();
     const axiosSecure = useAxiosSecure();
 
@@ -19,6 +25,12 @@ const Profile = () => {
     // form state
     const [name, setName] = useState(user?.displayName || dbUser?.name || "");
     const [photoFile, setPhotoFile] = useState(null);
+
+    // password states
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [changingPass, setChangingPass] = useState(false);
 
     useEffect(() => {
         setName(user?.displayName || dbUser?.name || "");
@@ -35,7 +47,9 @@ const Profile = () => {
             try {
                 const res = await axiosSecure.get(`/lessons/my?email=${user.email}`);
                 const list = Array.isArray(res.data) ? res.data : [];
-                const publicOnly = list.filter((l) => l.visibility === "public" && l.isDeleted !== true);
+                const publicOnly = list.filter(
+                    (l) => l.visibility === "public" && l.isDeleted !== true
+                );
                 if (!cancelled) setMyPublicLessons(publicOnly);
             } catch (e) {
                 if (!cancelled) {
@@ -106,6 +120,42 @@ const Profile = () => {
         }
     };
 
+    // Password change handler
+    const handleChangePassword = async (e) => {
+        e.preventDefault();
+
+        if (!user?.email) return toast.error("No logged in user");
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            return toast.error("All password fields are required");
+        }
+        if (newPassword.length < 6) {
+            return toast.error("New password must be at least 6 characters");
+        }
+        if (newPassword !== confirmPassword) {
+            return toast.error("New passwords do not match");
+        }
+
+        try {
+            setChangingPass(true);
+
+            // 1) re-auth required
+            await reauthenticateUser(currentPassword);
+
+            // 2) update password
+            await changeUserPassword(newPassword);
+
+            toast.success("Password updated successfully");
+            setCurrentPassword("");
+            setNewPassword("");
+            setConfirmPassword("");
+        } catch (err) {
+            console.error("Password update error:", err);
+            toast.error(err?.message || "Failed to update password");
+        } finally {
+            setChangingPass(false);
+        }
+    };
+
     if (loadingUser) return <Spinner />;
 
     return (
@@ -114,7 +164,9 @@ const Profile = () => {
             <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-semibold text-base-content">My Profile</h1>
-                    <p className="text-sm text-base-content/70">Manage your profile information</p>
+                    <p className="text-sm text-base-content/70">
+                        Manage your profile information
+                    </p>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -170,13 +222,17 @@ const Profile = () => {
                     </div>
                 </div>
 
-                {/* update form */}
+                {/* update form + password section */}
                 <div className="lg:col-span-2 bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5">
-                    <h2 className="text-lg font-semibold mb-3 text-base-content">Update Profile</h2>
+                    <h2 className="text-lg font-semibold mb-3 text-base-content">
+                        Update Profile
+                    </h2>
 
                     <form onSubmit={handleUpdateProfile} className="space-y-4">
                         <div>
-                            <label className="text-sm font-medium text-base-content">Display Name</label>
+                            <label className="text-sm font-medium text-base-content">
+                                Display Name
+                            </label>
                             <input
                                 type="text"
                                 className="input input-bordered w-full mt-1 bg-base-100 text-base-content border-base-300"
@@ -187,7 +243,9 @@ const Profile = () => {
                         </div>
 
                         <div>
-                            <label className="text-sm font-medium text-base-content">Photo</label>
+                            <label className="text-sm font-medium text-base-content">
+                                Photo
+                            </label>
                             <input
                                 type="file"
                                 accept="image/*"
@@ -203,13 +261,71 @@ const Profile = () => {
                             {saving ? "Updating..." : "Save Changes"}
                         </button>
                     </form>
+
+                    {/* Password update option */}
+                    <div className="mt-6 border-t border-base-300 pt-5">
+                        <h3 className="text-lg font-semibold text-base-content mb-3">
+                            Change Password
+                        </h3>
+
+                        <form onSubmit={handleChangePassword} className="space-y-3">
+                            <div>
+                                <label className="text-sm font-medium text-base-content">
+                                    Current Password
+                                </label>
+                                <input
+                                    type="password"
+                                    className="input input-bordered w-full mt-1"
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    placeholder="Current password"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="text-sm font-medium text-base-content">
+                                    New Password
+                                </label>
+                                <input
+                                    type="password"
+                                    className="input input-bordered w-full mt-1"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    placeholder="New password"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="text-sm font-medium text-base-content">
+                                    Confirm New Password
+                                </label>
+                                <input
+                                    type="password"
+                                    className="input input-bordered w-full mt-1"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="Confirm new password"
+                                />
+                            </div>
+
+                            <button disabled={changingPass} className="btn btn-primary btn-sm">
+                                {changingPass ? "Updating..." : "Update Password"}
+                            </button>
+
+                            <p className="text-xs text-base-content/60">
+                                Note: For security, Firebase may require recent login before password change.
+                            </p>
+                        </form>
+                    </div>
                 </div>
             </div>
 
             {/* Public lessons */}
             <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5">
                 <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-lg font-semibold text-base-content">My Public Lessons</h2>
+                    <h2 className="text-lg font-semibold text-base-content">
+                        My Public Lessons
+                    </h2>
                     <Link to="/dashboard/my-lessons" className="text-sm text-primary hover:underline">
                         Manage lessons →
                     </Link>
@@ -219,7 +335,9 @@ const Profile = () => {
                     <Spinner />
                 ) : myPublicLessons.length === 0 ? (
                     <div className="border border-base-300 bg-base-200 rounded-2xl p-6 text-center">
-                        <p className="font-medium mb-1 text-base-content">No public lessons yet.</p>
+                        <p className="font-medium mb-1 text-base-content">
+                            No public lessons yet.
+                        </p>
                         <p className="text-sm text-base-content/70 mb-3">
                             Make a lesson public from “My Lessons” or create a new one.
                         </p>
@@ -234,7 +352,9 @@ const Profile = () => {
                                 key={l._id}
                                 className="rounded-2xl border border-base-300 bg-base-100 p-4 hover:shadow-sm transition"
                             >
-                                <p className="font-semibold line-clamp-2 text-base-content">{l.title}</p>
+                                <p className="font-semibold line-clamp-2 text-base-content">
+                                    {l.title}
+                                </p>
                                 <p className="text-xs text-base-content/60 mt-1">
                                     {l.category} • {l.emotionalTone} • {l.accessLevel}
                                 </p>
@@ -246,7 +366,10 @@ const Profile = () => {
                                     <Link to={`/lessons/${l._id}`} className="btn btn-xs">
                                         Details
                                     </Link>
-                                    <Link to={`/dashboard/update-lesson/${l._id}`} className="btn btn-xs btn-outline">
+                                    <Link
+                                        to={`/dashboard/update-lesson/${l._id}`}
+                                        className="btn btn-xs btn-outline"
+                                    >
                                         Update
                                     </Link>
                                 </div>
