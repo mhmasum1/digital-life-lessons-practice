@@ -41,8 +41,12 @@ const MiniTable = ({ title, rows }) => (
                         {rows.map((r, i) => (
                             <tr key={r._id || r.email}>
                                 <td>{i + 1}</td>
-                                <td className="font-medium text-base-content">{r.name || "N/A"}</td>
-                                <td className="text-xs text-base-content/60">{r.email || r._id}</td>
+                                <td className="font-medium text-base-content">
+                                    {r.name || "N/A"}
+                                </td>
+                                <td className="text-xs text-base-content/60">
+                                    {r.email || r._id}
+                                </td>
                                 <td className="text-right font-semibold text-base-content">
                                     {r.lessonsCount ?? r.totalLessons ?? 0}
                                 </td>
@@ -63,6 +67,9 @@ const GrowthCard = ({ title, data }) => {
         [data]
     );
 
+    const p = getComputedStyle(document.documentElement).getPropertyValue("--p")?.trim();
+    const strokeColor = p ? `hsl(${p})` : "#ff6b00";
+
     return (
         <div className="bg-base-100 border border-base-300 rounded-2xl p-5 shadow-sm min-w-0">
             <h3 className="font-semibold mb-3 text-base-content">{title}</h3>
@@ -73,18 +80,16 @@ const GrowthCard = ({ title, data }) => {
                 <div className="h-56 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={chartData}>
-                            {/* grid a little subtle in dark */}
                             <CartesianGrid strokeDasharray="3 3" opacity={0.35} />
                             <XAxis dataKey="short" tick={{ fontSize: 12 }} />
                             <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                             <Tooltip />
-                            {/* theme primary color */}
                             <Line
                                 type="monotone"
                                 dataKey="count"
-                                stroke="hsl(var(--p))"
-                                strokeWidth={2}
-                                dot={false}
+                                stroke={strokeColor}
+                                strokeWidth={3}
+                                dot={{ r: 2 }}
                             />
                         </LineChart>
                     </ResponsiveContainer>
@@ -172,7 +177,10 @@ const AdminHome = () => {
                 <StatCard label="Total Lessons" value={stats.totalLessons ?? 0} />
                 <StatCard label="Public Lessons" value={stats.publicLessons ?? 0} />
                 <StatCard label="Total Reports" value={stats.totalReports ?? 0} />
-                <StatCard label="Today’s New Lessons" value={stats.todaysNewLessons ?? 0} />
+                <StatCard
+                    label="Today’s New Lessons"
+                    value={stats.todaysNewLessons ?? 0}
+                />
             </div>
 
             <div className="grid lg:grid-cols-3 gap-4">
@@ -181,7 +189,10 @@ const AdminHome = () => {
                 </div>
 
                 <div className="lg:col-span-2">
-                    <GrowthCard title="Lesson Growth (last 30 days)" data={stats.lessonGrowth || []} />
+                    <GrowthCard
+                        title="Lesson Growth (last 30 days)"
+                        data={stats.lessonGrowth || []}
+                    />
                 </div>
             </div>
         </div>
