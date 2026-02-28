@@ -13,24 +13,24 @@ import {
 } from "recharts";
 
 const StatCard = ({ label, value }) => (
-    <div className="bg-white border border-orange-100 rounded-2xl p-5 shadow-sm">
-        <p className="text-xs text-gray-500 mb-1">{label}</p>
-        <p className="text-2xl font-bold text-gray-900">{value}</p>
+    <div className="bg-base-100 border border-base-300 rounded-2xl p-5 shadow-sm">
+        <p className="text-xs text-base-content/60 mb-1">{label}</p>
+        <p className="text-2xl font-bold text-base-content">{value}</p>
     </div>
 );
 
 const MiniTable = ({ title, rows }) => (
-    <div className="bg-white border border-orange-100 rounded-2xl p-5 shadow-sm">
+    <div className="bg-base-100 border border-base-300 rounded-2xl p-5 shadow-sm">
         <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold">{title}</h3>
-            <span className="text-xs text-gray-500">Top 6</span>
+            <h3 className="font-semibold text-base-content">{title}</h3>
+            <span className="text-xs text-base-content/60">Top 6</span>
         </div>
 
         {rows?.length ? (
             <div className="overflow-x-auto">
                 <table className="table table-sm">
                     <thead>
-                        <tr className="text-xs">
+                        <tr className="text-xs text-base-content/70">
                             <th>#</th>
                             <th>Name</th>
                             <th>Email</th>
@@ -41,9 +41,9 @@ const MiniTable = ({ title, rows }) => (
                         {rows.map((r, i) => (
                             <tr key={r._id || r.email}>
                                 <td>{i + 1}</td>
-                                <td className="font-medium">{r.name || "N/A"}</td>
-                                <td className="text-xs opacity-70">{r.email || r._id}</td>
-                                <td className="text-right font-semibold">
+                                <td className="font-medium text-base-content">{r.name || "N/A"}</td>
+                                <td className="text-xs text-base-content/60">{r.email || r._id}</td>
+                                <td className="text-right font-semibold text-base-content">
                                     {r.lessonsCount ?? r.totalLessons ?? 0}
                                 </td>
                             </tr>
@@ -52,7 +52,7 @@ const MiniTable = ({ title, rows }) => (
                 </table>
             </div>
         ) : (
-            <p className="text-sm text-gray-500">No data found.</p>
+            <p className="text-sm text-base-content/60">No data found.</p>
         )}
     </div>
 );
@@ -64,20 +64,28 @@ const GrowthCard = ({ title, data }) => {
     );
 
     return (
-        <div className="bg-white border border-orange-100 rounded-2xl p-5 shadow-sm min-w-0">
-            <h3 className="font-semibold mb-3">{title}</h3>
+        <div className="bg-base-100 border border-base-300 rounded-2xl p-5 shadow-sm min-w-0">
+            <h3 className="font-semibold mb-3 text-base-content">{title}</h3>
 
             {!chartData.length ? (
-                <p className="text-sm text-gray-500">No chart data.</p>
+                <p className="text-sm text-base-content/60">No chart data.</p>
             ) : (
                 <div className="h-56 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={chartData}>
-                            <CartesianGrid strokeDasharray="3 3" />
+                            {/* grid a little subtle in dark */}
+                            <CartesianGrid strokeDasharray="3 3" opacity={0.35} />
                             <XAxis dataKey="short" tick={{ fontSize: 12 }} />
                             <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                             <Tooltip />
-                            <Line type="monotone" dataKey="count" strokeWidth={2} dot={false} />
+                            {/* theme primary color */}
+                            <Line
+                                type="monotone"
+                                dataKey="count"
+                                stroke="hsl(var(--p))"
+                                strokeWidth={2}
+                                dot={false}
+                            />
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
@@ -139,8 +147,8 @@ const AdminHome = () => {
     if (!stats) {
         return (
             <div className="p-6">
-                <div className="bg-[#FFF7ED] border border-orange-100 rounded-2xl p-6">
-                    <p className="text-sm text-gray-700">
+                <div className="bg-base-200 border border-base-300 rounded-2xl p-6">
+                    <p className="text-sm text-base-content/80">
                         Failed to load stats. Please try again.
                     </p>
                 </div>
@@ -149,12 +157,14 @@ const AdminHome = () => {
     }
 
     return (
-        <div className="p-6 space-y-5">
+        <div className="p-4 md:p-6 space-y-5">
             <div>
-                <h1 className="text-2xl font-semibold text-gray-900 mb-1">
+                <h1 className="text-2xl font-semibold text-base-content mb-1">
                     Admin Dashboard
                 </h1>
-                <p className="text-sm text-gray-600">Platform overview & quick stats.</p>
+                <p className="text-sm text-base-content/70">
+                    Platform overview & quick stats.
+                </p>
             </div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -171,10 +181,7 @@ const AdminHome = () => {
                 </div>
 
                 <div className="lg:col-span-2">
-                    <GrowthCard
-                        title="Lesson Growth (last 30 days)"
-                        data={stats.lessonGrowth || []}
-                    />
+                    <GrowthCard title="Lesson Growth (last 30 days)" data={stats.lessonGrowth || []} />
                 </div>
             </div>
         </div>

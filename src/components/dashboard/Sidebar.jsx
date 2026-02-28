@@ -1,57 +1,73 @@
 import { NavLink } from "react-router-dom";
 import useAdmin from "../../hooks/useAdmin";
 
-const linkClass = ({ isActive }) =>
-    `block px-3 py-2 rounded ${isActive ? "bg-orange-200 text-orange-900" : "bg-orange-50"
-    }`;
-
 const Sidebar = () => {
     const { isAdmin, adminLoading } = useAdmin();
 
     if (adminLoading) return null;
 
     return (
-        <div className="p-4 space-y-2">
+        <div className="p-4 h-full bg-base-100 text-base-content">
             <h2 className="text-lg font-semibold mb-4">
                 {isAdmin ? "Admin Dashboard" : "Dashboard Menu"}
             </h2>
 
-            {/* Common */}
-            <NavLink to="/" className={linkClass}>
-                ← Back to Home
-            </NavLink>
+            <ul className="menu menu-sm gap-1">
 
-            {!isAdmin ? (
-                <>
-                    <NavLink to="/dashboard" className={linkClass}>
-                        User Home
+                {/* Common */}
+                <li>
+                    <NavLink
+                        to="/"
+                        className={({ isActive }) =>
+                            isActive ? "active text-primary font-semibold" : ""
+                        }
+                    >
+                        ← Back to Home
                     </NavLink>
-                    <NavLink to="/dashboard/profile" className={linkClass}>
-                        Profile
-                    </NavLink>
+                </li>
 
+                {!isAdmin ? (
+                    <>
+                        <li>
+                            <NavLink to="/dashboard">User Home</NavLink>
+                        </li>
 
-                    <NavLink to="/dashboard/my-lessons" className={linkClass}>
-                        My Lessons
-                    </NavLink>
+                        <li>
+                            <NavLink to="/dashboard/profile">Profile</NavLink>
+                        </li>
 
-                    <NavLink to="/dashboard/add-lesson" className={linkClass}>
-                        Add Lesson
-                    </NavLink>
+                        <li>
+                            <NavLink to="/dashboard/my-lessons">My Lessons</NavLink>
+                        </li>
 
-                    <NavLink to="/dashboard/favorites" className={linkClass}>
-                        My Favorites
-                    </NavLink>
-                </>
-            ) : (
-                <>
-                    {/* admin */}
-                    <NavLink to="/dashboard/admin" className={linkClass}>Admin Home</NavLink>
-                    <NavLink to="/dashboard/admin/manage-users" className={linkClass}>Manage Users</NavLink>
-                    <NavLink to="/dashboard/admin/manage-lessons" className={linkClass}>Manage Lessons</NavLink>
-                    <NavLink to="/dashboard/admin/reported-lessons" className={linkClass}>Reported Lessons</NavLink>
-                    <NavLink to="/dashboard/admin/profile" className={linkClass}>Admin Profile</NavLink></>
-            )}
+                        <li>
+                            <NavLink to="/dashboard/add-lesson">Add Lesson</NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink to="/dashboard/favorites">My Favorites</NavLink>
+                        </li>
+                    </>
+                ) : (
+                    <>
+                        <li>
+                            <NavLink to="/dashboard/admin">Admin Home</NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/dashboard/admin/manage-users">Manage Users</NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/dashboard/admin/manage-lessons">Manage Lessons</NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/dashboard/admin/reported-lessons">Reported Lessons</NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/dashboard/admin/profile">Admin Profile</NavLink>
+                        </li>
+                    </>
+                )}
+            </ul>
         </div>
     );
 };

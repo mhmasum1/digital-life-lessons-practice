@@ -18,7 +18,7 @@ const AddLesson = () => {
 
     const [submitting, setSubmitting] = useState(false);
 
-    // form state 
+    // form state
     const [accessLevel, setAccessLevel] = useState("free");
     const [visibility, setVisibility] = useState("public");
 
@@ -70,7 +70,6 @@ const AddLesson = () => {
                 setAccessLevel("free");
                 setVisibility("public");
 
-                // show Lottie success overlay then redirect
                 setShowSuccess(true);
 
                 setTimeout(() => {
@@ -89,41 +88,44 @@ const AddLesson = () => {
     };
 
     if (loadingUser) {
-        return <div className="text-center py-10">Loading...</div>;
+        return (
+            <div className="text-center py-10">
+                <p className="text-sm text-base-content/70">Loading...</p>
+            </div>
+        );
     }
 
     return (
         <div className="max-w-3xl mx-auto px-4 py-10 relative">
-            {/* ✅ Success Lottie Overlay */}
             {showSuccess && (
-                <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl border border-orange-100 text-center">
+                <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+                    <div className="bg-base-100 rounded-2xl p-6 w-full max-w-sm shadow-xl border border-base-300 text-center">
                         <div className="mx-auto w-44">
                             <Lottie animationData={successAnim} loop={false} />
                         </div>
-                        <p className="mt-2 font-semibold text-gray-900">Saved!</p>
-                        <p className="text-xs text-gray-600">Redirecting to My Lessons…</p>
+                        <p className="mt-2 font-semibold text-base-content">Saved!</p>
+                        <p className="text-xs text-base-content/70">Redirecting to My Lessons…</p>
                     </div>
                 </div>
             )}
 
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold text-base-content mb-6">
                 Share a Life Lesson
             </h1>
-            <p className="text-sm text-gray-600 mb-6">
+            <p className="text-sm text-base-content/70 mb-6">
                 Write a real story, insight or experience that could help other students and learners.
             </p>
 
             {!isPremiumUser && (
-                <div className="mb-5 rounded-xl border border-orange-200 bg-orange-50 p-4">
-                    <p className="font-semibold text-gray-900">Premium lesson is locked</p>
-                    <p className="text-sm text-gray-600 mt-1">
+                <div className="mb-5 rounded-2xl border border-primary/20 bg-primary/10 p-4">
+                    <p className="font-semibold text-base-content">Premium lesson is locked</p>
+                    <p className="text-sm text-base-content/70 mt-1">
                         Upgrade to Premium to create paid lessons (Premium access level).
                     </p>
                     <button
                         type="button"
                         onClick={() => navigate("/pricing")}
-                        className="btn btn-sm btn-warning mt-3"
+                        className="btn btn-sm btn-primary mt-3"
                     >
                         View Pricing
                     </button>
@@ -132,55 +134,57 @@ const AddLesson = () => {
 
             <form
                 onSubmit={handleSubmit}
-                className="space-y-5 bg-white border border-orange-100 rounded-xl p-5 shadow-sm"
+                className="space-y-5 bg-base-100 border border-base-300 rounded-2xl p-5 shadow-sm"
             >
                 {/* Title */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Lesson title <span className="text-red-500">*</span>
+                    <label className="block text-sm font-medium text-base-content mb-1">
+                        Lesson title <span className="text-error">*</span>
                     </label>
                     <input
                         type="text"
                         name="title"
                         required
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary"
+                        className="input input-bordered w-full bg-base-100 text-base-content border-base-300"
                         placeholder="e.g. How I Learned to Handle Failure in University"
                     />
                 </div>
 
                 {/* Short Description */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Short description (preview) <span className="text-red-500">*</span>
+                    <label className="block text-sm font-medium text-base-content mb-1">
+                        Short description (preview) <span className="text-error">*</span>
                     </label>
                     <textarea
                         name="shortDescription"
                         rows={2}
                         required
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary"
+                        className="textarea textarea-bordered w-full bg-base-100 text-base-content border-base-300"
                         placeholder="2–3 lines summary that will appear on the card."
                     />
                 </div>
 
                 {/* Full Details */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-base-content mb-1">
                         Full story / lesson details
                     </label>
                     <textarea
                         name="details"
                         rows={5}
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary"
+                        className="textarea textarea-bordered w-full bg-base-100 text-base-content border-base-300"
                         placeholder="Write the full lesson, what happened, what you felt and what you learned."
                     />
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                        <label className="block text-sm font-medium text-base-content mb-1">
+                            Category
+                        </label>
                         <select
                             name="category"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary"
+                            className="select select-bordered w-full bg-base-100 text-base-content border-base-300"
                             defaultValue="Self-Growth"
                         >
                             <option>Self-Growth</option>
@@ -195,10 +199,12 @@ const AddLesson = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Emotional tone</label>
+                        <label className="block text-sm font-medium text-base-content mb-1">
+                            Emotional tone
+                        </label>
                         <select
                             name="emotionalTone"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary"
+                            className="select select-bordered w-full bg-base-100 text-base-content border-base-300"
                             defaultValue="Reflective"
                         >
                             <option>Reflective</option>
@@ -214,11 +220,12 @@ const AddLesson = () => {
 
                 {/* Access level */}
                 <div>
-                    <p className="block text-sm font-medium text-gray-700 mb-1">Access level</p>
+                    <p className="block text-sm font-medium text-base-content mb-1">Access level</p>
 
-                    <div className="flex flex-wrap gap-5 text-sm">
-                        <label className="inline-flex items-center gap-2">
+                    <div className="flex flex-wrap gap-5 text-sm text-base-content/80">
+                        <label className="inline-flex items-center gap-2 cursor-pointer">
                             <input
+                                className="radio radio-primary"
                                 type="radio"
                                 name="accessLevel"
                                 value="free"
@@ -229,11 +236,12 @@ const AddLesson = () => {
                         </label>
 
                         <label
-                            className={`inline-flex items-center gap-2 ${!isPremiumUser ? "opacity-60 cursor-not-allowed" : ""
+                            className={`inline-flex items-center gap-2 ${!isPremiumUser ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
                                 }`}
                             title={!isPremiumUser ? "Upgrade to Premium to create Premium lessons" : ""}
                         >
                             <input
+                                className="radio radio-primary"
                                 type="radio"
                                 name="accessLevel"
                                 value="premium"
@@ -248,18 +256,21 @@ const AddLesson = () => {
                                 disabled={!isPremiumUser}
                             />
                             <span>Premium lesson</span>
-                            {!isPremiumUser && <span className="text-[11px] text-gray-500">(Locked)</span>}
+                            {!isPremiumUser && (
+                                <span className="text-[11px] text-base-content/60">(Locked)</span>
+                            )}
                         </label>
                     </div>
                 </div>
 
                 {/* Visibility */}
                 <div>
-                    <p className="block text-sm font-medium text-gray-700 mb-1">Visibility</p>
+                    <p className="block text-sm font-medium text-base-content mb-1">Visibility</p>
 
-                    <div className="flex flex-wrap gap-5 text-sm">
-                        <label className="inline-flex items-center gap-2">
+                    <div className="flex flex-wrap gap-5 text-sm text-base-content/80">
+                        <label className="inline-flex items-center gap-2 cursor-pointer">
                             <input
+                                className="radio radio-primary"
                                 type="radio"
                                 name="visibility"
                                 value="public"
@@ -269,8 +280,9 @@ const AddLesson = () => {
                             <span>Public – show on Browse Public Life Lessons</span>
                         </label>
 
-                        <label className="inline-flex items-center gap-2">
+                        <label className="inline-flex items-center gap-2 cursor-pointer">
                             <input
+                                className="radio radio-primary"
                                 type="radio"
                                 name="visibility"
                                 value="private"
@@ -284,11 +296,7 @@ const AddLesson = () => {
 
                 {/* Submit */}
                 <div className="pt-2">
-                    <button
-                        type="submit"
-                        disabled={submitting}
-                        className="w-full md:w-auto px-5 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-orange-500 transition disabled:opacity-60"
-                    >
+                    <button type="submit" disabled={submitting} className="btn btn-primary w-full md:w-auto">
                         {submitting ? "Saving..." : "Save Lesson"}
                     </button>
                 </div>

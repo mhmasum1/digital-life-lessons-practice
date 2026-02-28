@@ -50,7 +50,8 @@ const ReportedLessons = () => {
             showCancelButton: true,
             confirmButtonText: "Yes, ignore",
             cancelButtonText: "Cancel",
-            confirmButtonColor: "#6b7280",
+            reverseButtons: true,
+            focusCancel: true,
         });
 
         if (!result.isConfirmed) return;
@@ -77,7 +78,8 @@ const ReportedLessons = () => {
             showCancelButton: true,
             confirmButtonText: "Yes, delete",
             cancelButtonText: "Cancel",
-            confirmButtonColor: "#ef4444",
+            reverseButtons: true,
+            focusCancel: true,
         });
 
         if (!result.isConfirmed) return;
@@ -100,18 +102,22 @@ const ReportedLessons = () => {
     if (loading) return <Spinner />;
 
     return (
-        <div className="p-6 space-y-4">
+        <div className="p-4 md:p-6 space-y-4">
             <div>
-                <h2 className="text-xl font-semibold">Reported / Flagged Lessons</h2>
-                <p className="text-sm text-gray-600">Review reports, see reasons, take action.</p>
+                <h2 className="text-xl font-semibold text-base-content">
+                    Reported / Flagged Lessons
+                </h2>
+                <p className="text-sm text-base-content/70">
+                    Review reports, see reasons, take action.
+                </p>
             </div>
 
             {rows.length === 0 ? (
-                <p className="text-gray-500">No reported lessons 🎉</p>
+                <p className="text-base-content/60">No reported lessons 🎉</p>
             ) : (
-                <div className="overflow-x-auto bg-white border rounded-xl">
+                <div className="overflow-x-auto bg-base-100 border border-base-300 rounded-2xl">
                     <table className="table w-full">
-                        <thead className="bg-orange-50 text-sm">
+                        <thead className="bg-base-200 text-sm text-base-content/80">
                             <tr>
                                 <th>Lesson</th>
                                 <th>Category</th>
@@ -128,22 +134,37 @@ const ReportedLessons = () => {
                                 return (
                                     <tr key={r.lessonId}>
                                         <td>
-                                            <p className="font-semibold">{r.lessonTitle || "Untitled Lesson"}</p>
-                                            <p className="text-xs opacity-60">Lesson ID: {r.lessonId}</p>
+                                            <p className="font-semibold text-base-content">
+                                                {r.lessonTitle || "Untitled Lesson"}
+                                            </p>
+                                            <p className="text-xs text-base-content/60">
+                                                Lesson ID: {r.lessonId}
+                                            </p>
                                         </td>
-                                        <td>{r.category || "—"}</td>
-                                        <td className="capitalize">{r.lessonVisibility || "—"}</td>
-                                        <td className="text-center font-bold">{r.reportCount || 0}</td>
+
+                                        <td className="text-base-content">{r.category || "—"}</td>
+
+                                        <td className="capitalize text-base-content">
+                                            {r.lessonVisibility || "—"}
+                                        </td>
+
+                                        <td className="text-center font-bold text-base-content">
+                                            {r.reportCount || 0}
+                                        </td>
+
                                         <td className="text-right">
                                             <div className="flex justify-end gap-2 flex-wrap">
-                                                <button onClick={() => openReasons(r)} className="btn btn-xs bg-gray-900 text-white">
+                                                <button
+                                                    onClick={() => openReasons(r)}
+                                                    className="btn btn-xs btn-outline"
+                                                >
                                                     View Reasons
                                                 </button>
 
                                                 <button
                                                     disabled={busy}
                                                     onClick={() => deleteLessonAndReports(r.lessonId)}
-                                                    className="btn btn-xs bg-red-500 text-white"
+                                                    className="btn btn-xs btn-error"
                                                 >
                                                     {busy ? "..." : "Delete Lesson"}
                                                 </button>
@@ -151,7 +172,7 @@ const ReportedLessons = () => {
                                                 <button
                                                     disabled={busy}
                                                     onClick={() => ignoreLessonReports(r.lessonId)}
-                                                    className="btn btn-xs bg-gray-200"
+                                                    className="btn btn-xs btn-ghost"
                                                 >
                                                     {busy ? "..." : "Ignore"}
                                                 </button>
@@ -165,32 +186,52 @@ const ReportedLessons = () => {
                 </div>
             )}
 
+            {/* Modal */}
             {modalOpen && selected && (
-                <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={closeModal}>
-                    <div className="bg-white rounded-xl max-w-2xl w-full border p-5" onClick={(e) => e.stopPropagation()}>
+                <div
+                    className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
+                    onClick={closeModal}
+                >
+                    <div
+                        className="bg-base-100 text-base-content rounded-2xl max-w-2xl w-full border border-base-300 p-5 shadow-lg"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <div className="flex items-start justify-between gap-3 mb-3">
                             <div>
                                 <h3 className="text-lg font-semibold">Report Reasons</h3>
-                                <p className="text-sm text-gray-600">{selected.lessonTitle || "Untitled Lesson"}</p>
+                                <p className="text-sm text-base-content/70">
+                                    {selected.lessonTitle || "Untitled Lesson"}
+                                </p>
                             </div>
-                            <button className="btn btn-sm" onClick={closeModal}>
+                            <button className="btn btn-sm btn-ghost" onClick={closeModal}>
                                 Close
                             </button>
                         </div>
 
                         <div className="space-y-2 max-h-[60vh] overflow-auto">
                             {(selected.reports || []).map((rep) => (
-                                <div key={rep._id} className="border rounded-lg p-3">
+                                <div
+                                    key={rep._id}
+                                    className="border border-base-300 rounded-xl p-3"
+                                >
                                     <div className="flex items-center justify-between">
-                                        <p className="font-semibold text-sm">{rep.reason || "Other"}</p>
-                                        <p className="text-xs opacity-60">
-                                            {rep.createdAt ? new Date(rep.createdAt).toLocaleString() : ""}
+                                        <p className="font-semibold text-sm">
+                                            {rep.reason || "Other"}
+                                        </p>
+                                        <p className="text-xs text-base-content/60">
+                                            {rep.createdAt
+                                                ? new Date(rep.createdAt).toLocaleString()
+                                                : ""}
                                         </p>
                                     </div>
 
-                                    {rep.message ? <p className="text-sm mt-1">{rep.message}</p> : null}
+                                    {rep.message ? (
+                                        <p className="text-sm mt-1 text-base-content">
+                                            {rep.message}
+                                        </p>
+                                    ) : null}
 
-                                    <p className="text-xs opacity-70 mt-2">
+                                    <p className="text-xs text-base-content/70 mt-2">
                                         Reporter: {rep.reporterName || "Unknown"} ({rep.reporterEmail})
                                     </p>
                                 </div>
@@ -199,12 +240,15 @@ const ReportedLessons = () => {
 
                         <div className="flex justify-end gap-2 mt-4">
                             <button
-                                className="btn btn-sm bg-red-500 text-white"
+                                className="btn btn-sm btn-error"
                                 onClick={() => deleteLessonAndReports(selected.lessonId)}
                             >
                                 Delete Lesson
                             </button>
-                            <button className="btn btn-sm bg-gray-200" onClick={() => ignoreLessonReports(selected.lessonId)}>
+                            <button
+                                className="btn btn-sm btn-ghost"
+                                onClick={() => ignoreLessonReports(selected.lessonId)}
+                            >
                                 Ignore Reports
                             </button>
                         </div>

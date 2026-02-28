@@ -20,7 +20,6 @@ const AdminProfile = () => {
     }, [user?.displayName]);
 
     useEffect(() => {
-        // just for a consistent loading UX
         if (user?.email) setLoading(false);
     }, [user?.email]);
 
@@ -33,10 +32,8 @@ const AdminProfile = () => {
 
         try {
             setSaving(true);
-
             let photoURL = user?.photoURL || "";
 
-            // upload new photo (optional)
             if (photoFile) {
                 const key = import.meta.env.VITE_photo_host_key;
                 if (!key) {
@@ -52,10 +49,8 @@ const AdminProfile = () => {
                 photoURL = uploadRes?.data?.data?.url || photoURL;
             }
 
-            // update firebase profile
             await updateUserProfile({ displayName: finalName, photoURL });
 
-            // update DB user (upsert)
             await axiosSecure.post("/users", {
                 email: user.email,
                 displayName: finalName,
@@ -78,72 +73,83 @@ const AdminProfile = () => {
 
     return (
         <div className="p-4 md:p-6 space-y-6">
+
             {/* Header */}
-            <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-5 flex items-center justify-between">
+            <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5 flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-semibold">Admin Profile</h1>
-                    <p className="text-sm text-gray-600">Admin account details & settings</p>
+                    <h1 className="text-2xl font-semibold text-base-content">Admin Profile</h1>
+                    <p className="text-sm text-base-content/70">
+                        Admin account details & settings
+                    </p>
                 </div>
 
-                <span className="badge badge-error text-white font-semibold px-3 py-3">
+                <span className="badge badge-error font-semibold px-3 py-3">
                     Admin
                 </span>
             </div>
 
             {/* Content */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
                 {/* Left card */}
-                <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-5">
+                <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5">
                     <div className="flex items-center gap-3">
                         {user?.photoURL ? (
                             <img
                                 src={user.photoURL}
                                 alt="admin avatar"
-                                className="w-14 h-14 rounded-full border object-cover"
+                                className="w-14 h-14 rounded-full border border-base-300 object-cover"
                                 referrerPolicy="no-referrer"
                             />
                         ) : (
-                            <div className="w-14 h-14 rounded-full border flex items-center justify-center font-bold">
+                            <div className="w-14 h-14 rounded-full border border-base-300 flex items-center justify-center font-bold text-base-content">
                                 {avatarLetter}
                             </div>
                         )}
 
                         <div className="leading-tight">
-                            <p className="font-semibold">{user?.displayName || "Admin"}</p>
-                            <p className="text-xs opacity-70">{user?.email}</p>
+                            <p className="font-semibold text-base-content">
+                                {user?.displayName || "Admin"}
+                            </p>
+                            <p className="text-xs text-base-content/60">
+                                {user?.email}
+                            </p>
                         </div>
                     </div>
 
-                    <div className="mt-4 rounded-lg border p-3">
-                        <p className="text-xs text-gray-500">Role</p>
-                        <p className="text-lg font-bold">Administrator</p>
+                    <div className="mt-4 rounded-lg border border-base-300 p-3">
+                        <p className="text-xs text-base-content/60">Role</p>
+                        <p className="text-lg font-bold text-base-content">
+                            Administrator
+                        </p>
                     </div>
 
                     <div className="mt-4 grid grid-cols-2 gap-3">
-                        <div className="rounded-lg border p-3">
-                            <p className="text-xs text-gray-500">Moderated</p>
-                            <p className="text-xl font-bold">-</p>
+                        <div className="rounded-lg border border-base-300 p-3">
+                            <p className="text-xs text-base-content/60">Moderated</p>
+                            <p className="text-xl font-bold text-base-content">-</p>
                         </div>
-                        <div className="rounded-lg border p-3">
-                            <p className="text-xs text-gray-500">Actions</p>
-                            <p className="text-xl font-bold">-</p>
+                        <div className="rounded-lg border border-base-300 p-3">
+                            <p className="text-xs text-base-content/60">Actions</p>
+                            <p className="text-xl font-bold text-base-content">-</p>
                         </div>
                     </div>
-
-                    <p className="text-xs text-gray-500 mt-3">
-                    </p>
                 </div>
 
                 {/* Right form */}
-                <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-orange-100 p-5">
-                    <h2 className="text-lg font-semibold mb-3">Update Admin Profile</h2>
+                <div className="lg:col-span-2 bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5">
+                    <h2 className="text-lg font-semibold mb-3 text-base-content">
+                        Update Admin Profile
+                    </h2>
 
                     <form onSubmit={handleSave} className="space-y-4">
                         <div>
-                            <label className="text-sm font-medium">Display Name</label>
+                            <label className="text-sm font-medium text-base-content">
+                                Display Name
+                            </label>
                             <input
                                 type="text"
-                                className="input input-bordered w-full mt-1"
+                                className="input input-bordered w-full mt-1 bg-base-100 text-base-content border-base-300"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 placeholder="Admin name"
@@ -151,14 +157,18 @@ const AdminProfile = () => {
                         </div>
 
                         <div>
-                            <label className="text-sm font-medium">Photo</label>
+                            <label className="text-sm font-medium text-base-content">
+                                Photo
+                            </label>
                             <input
                                 type="file"
                                 accept="image/*"
                                 className="file-input file-input-bordered w-full mt-1"
                                 onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
                             />
-                            <p className="text-xs text-gray-500 mt-1">Optional. JPG/PNG recommended.</p>
+                            <p className="text-xs text-base-content/60 mt-1">
+                                Optional. JPG/PNG recommended.
+                            </p>
                         </div>
 
                         <button disabled={saving} className="btn btn-primary btn-sm">

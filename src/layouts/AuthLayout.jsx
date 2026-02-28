@@ -1,18 +1,22 @@
-import { Outlet } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
 
 const AuthLayout = () => {
     return (
-        <div className="flex items-center justify-center bg-base-200 px-4">
-            <div className="w-full  bg-base-100 shadow-xl rounded-xl ">
+        <div className="min-h-screen flex items-center justify-center bg-base-200 px-4">
+            <div className="w-full max-w-md bg-base-100 shadow-xl rounded-2xl border border-base-300">
 
-                <Link to="/" className="block text-center font-bold text-2xl pt-5
-             transition-all duration-200
-             hover:text-orange-700 hover:-translate-y-0.5">
+                <Link
+                    to="/"
+                    className="block text-center font-bold text-2xl pt-5 text-base-content
+                    transition-all duration-200
+                    hover:text-primary hover:-translate-y-0.5"
+                >
                     Digital Life Lessons
                 </Link>
 
-                <Outlet />
+                <div className="p-6">
+                    <Outlet />
+                </div>
             </div>
         </div>
     );

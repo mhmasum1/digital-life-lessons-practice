@@ -35,7 +35,8 @@ const ManageUsers = () => {
         };
     }, [axiosSecure]);
 
-    const confirmAction = async ({ title, text, confirmText, confirmColor = "#f97316" }) => {
+    // SweetAlert confirm (no hardcoded hex)
+    const confirmAction = async ({ title, text, confirmText }) => {
         const result = await Swal.fire({
             title,
             text,
@@ -43,8 +44,6 @@ const ManageUsers = () => {
             showCancelButton: true,
             confirmButtonText: confirmText,
             cancelButtonText: "Cancel",
-            confirmButtonColor: confirmColor,
-            cancelButtonColor: "#64748b",
             reverseButtons: true,
             focusCancel: true,
         });
@@ -53,6 +52,7 @@ const ManageUsers = () => {
 
     const updateRole = async (u, role) => {
         const isSelf = u.email === currentUser?.email;
+
         if (role === "user" && isSelf) {
             return Swal.fire({
                 icon: "error",
@@ -62,18 +62,22 @@ const ManageUsers = () => {
         }
 
         const actionLabel = role === "admin" ? "Promote to Admin" : "Demote to User";
+
         const ok = await confirmAction({
-            title: actionLabel + "?",
+            title: `${actionLabel}?`,
             text: `This will update role for ${u.email}.`,
             confirmText: actionLabel,
-            confirmColor: role === "admin" ? "#f97316" : "#334155",
         });
+
         if (!ok) return;
 
         try {
             setActionLoading(u._id);
             await axiosSecure.patch(`/admin/users/${u._id}/role`, { role });
-            setUsers((prev) => prev.map((x) => (x._id === u._id ? { ...x, role } : x)));
+
+            setUsers((prev) =>
+                prev.map((x) => (x._id === u._id ? { ...x, role } : x))
+            );
 
             await Swal.fire({
                 icon: "success",
@@ -95,9 +99,8 @@ const ManageUsers = () => {
     };
 
     const deleteUser = async (u) => {
-        if (!u?.email) return;
-
         const isSelf = u.email === currentUser?.email;
+
         if (isSelf) {
             return Swal.fire({
                 icon: "error",
@@ -110,8 +113,8 @@ const ManageUsers = () => {
             title: "Remove this user?",
             text: `This will permanently delete ${u.email}.`,
             confirmText: "Yes, remove",
-            confirmColor: "#ef4444",
         });
+
         if (!ok) return;
 
         try {
@@ -141,15 +144,17 @@ const ManageUsers = () => {
     if (loading) return <Spinner />;
 
     return (
-        <div className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Manage Users</h2>
+        <div className="p-4 md:p-6">
+            <h2 className="text-xl font-semibold text-base-content mb-4">
+                Manage Users
+            </h2>
 
             {users.length === 0 ? (
-                <p className="text-gray-500">No users found.</p>
+                <p className="text-base-content/60">No users found.</p>
             ) : (
-                <div className="overflow-x-auto bg-white rounded-xl border">
+                <div className="overflow-x-auto bg-base-100 rounded-2xl border border-base-300">
                     <table className="table w-full">
-                        <thead className="bg-orange-50 text-sm">
+                        <thead className="bg-base-200 text-sm text-base-content/80">
                             <tr>
                                 <th>#</th>
                                 <th>Name</th>
@@ -162,32 +167,56 @@ const ManageUsers = () => {
 
                         <tbody>
                             {users.map((u, idx) => {
-                                const busy = actionLoading === u._id || actionLoading === u.email;
-                                const isSelf = u.email === currentUser?.email;
+                                const busy =
+                                    actionLoading === u._id ||
+                                    actionLoading === u.email;
+
+                                const isSelf =
+                                    u.email === currentUser?.email;
 
                                 return (
                                     <tr key={u._id}>
                                         <td>{idx + 1}</td>
-                                        <td>{u.name || "N/A"}</td>
-                                        <td>{u.email}</td>
-                                        <td className="font-semibold">{u.lessonsCount ?? 0}</td>
-                                        <td className="capitalize font-medium">{u.role}</td>
+
+                                        <td className="text-base-content">
+                                            {u.name || "N/A"}
+                                        </td>
+
+                                        <td className="text-base-content/70">
+                                            {u.email}
+                                        </td>
+
+                                        <td className="font-semibold text-base-content">
+                                            {u.lessonsCount ?? 0}
+                                        </td>
+
+                                        <td className="capitalize font-medium text-base-content">
+                                            {u.role}
+                                        </td>
 
                                         <td className="flex gap-2 justify-center">
                                             {u.role !== "admin" ? (
                                                 <button
                                                     disabled={busy}
-                                                    onClick={() => updateRole(u, "admin")}
-                                                    className="btn btn-xs bg-orange-500 text-white"
+                                                    onClick={() =>
+                                                        updateRole(u, "admin")
+                                                    }
+                                                    className="btn btn-xs btn-warning"
                                                 >
                                                     {busy ? "..." : "Promote"}
                                                 </button>
                                             ) : (
                                                 <button
                                                     disabled={busy || isSelf}
-                                                    onClick={() => updateRole(u, "user")}
-                                                    className="btn btn-xs bg-gray-700 text-white"
-                                                    title={isSelf ? "You cannot demote yourself" : "Demote to user"}
+                                                    onClick={() =>
+                                                        updateRole(u, "user")
+                                                    }
+                                                    className="btn btn-xs btn-neutral"
+                                                    title={
+                                                        isSelf
+                                                            ? "You cannot demote yourself"
+                                                            : "Demote to user"
+                                                    }
                                                 >
                                                     {busy ? "..." : "Demote"}
                                                 </button>
@@ -196,8 +225,12 @@ const ManageUsers = () => {
                                             <button
                                                 disabled={busy || isSelf}
                                                 onClick={() => deleteUser(u)}
-                                                className="btn btn-xs bg-red-500 text-white"
-                                                title={isSelf ? "You cannot delete yourself" : "Remove user"}
+                                                className="btn btn-xs btn-error"
+                                                title={
+                                                    isSelf
+                                                        ? "You cannot delete yourself"
+                                                        : "Remove user"
+                                                }
                                             >
                                                 {busy ? "..." : "Remove"}
                                             </button>

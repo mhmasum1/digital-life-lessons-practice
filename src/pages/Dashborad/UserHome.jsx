@@ -19,7 +19,6 @@ const UserHome = () => {
     });
     const [error, setError] = useState("");
 
-    // hooks always on top 
     useEffect(() => {
         if (!user?.email) return;
 
@@ -40,17 +39,14 @@ const UserHome = () => {
                 const myLessons = Array.isArray(myLessonsRes.data) ? myLessonsRes.data : [];
                 const favorites = Array.isArray(favRes.data?.favorites) ? favRes.data.favorites : [];
 
-                // recent 5 lessons
                 const recentLessons = myLessons.slice(0, 5);
 
-                // last 7 days chart 
                 const now = new Date();
                 const start = new Date(now);
                 start.setDate(now.getDate() - 6);
                 start.setHours(0, 0, 0, 0);
 
                 const countsMap = new Map();
-
                 myLessons.forEach((l) => {
                     const dt = l.createdAt ? new Date(l.createdAt) : null;
                     if (!dt || isNaN(dt)) return;
@@ -96,15 +92,16 @@ const UserHome = () => {
 
     if (adminLoading) return <Spinner />;
     if (isAdmin) return <Navigate to="/dashboard/admin-home" replace />;
-
     if (loading) return <Spinner />;
 
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-5">
-                <h1 className="text-2xl font-semibold mb-1">Welcome to your Dashboard</h1>
-                <p className="text-sm text-gray-600">
+            <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5">
+                <h1 className="text-2xl font-semibold mb-1 text-base-content">
+                    Welcome to your Dashboard
+                </h1>
+                <p className="text-sm text-base-content/70">
                     Here you can add lessons, manage your lessons and see your favorites.
                 </p>
 
@@ -115,36 +112,44 @@ const UserHome = () => {
                 )}
             </div>
 
+            {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-5">
-                    <p className="text-sm text-gray-500">Total Lessons</p>
-                    <p className="text-3xl font-bold mt-1">{stats.totalLessons}</p>
-                    <p className="text-xs text-gray-500 mt-2">Lessons you created</p>
+                <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5">
+                    <p className="text-sm text-base-content/60">Total Lessons</p>
+                    <p className="text-3xl font-bold mt-1 text-base-content">{stats.totalLessons}</p>
+                    <p className="text-xs text-base-content/60 mt-2">Lessons you created</p>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-5">
-                    <p className="text-sm text-gray-500">Total Favorites</p>
-                    <p className="text-3xl font-bold mt-1">{stats.totalFavorites}</p>
-                    <p className="text-xs text-gray-500 mt-2">Lessons you saved</p>
+                <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5">
+                    <p className="text-sm text-base-content/60">Total Favorites</p>
+                    <p className="text-3xl font-bold mt-1 text-base-content">{stats.totalFavorites}</p>
+                    <p className="text-xs text-base-content/60 mt-2">Lessons you saved</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-                <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-5">
-                    <h3 className="text-lg font-semibold">Last 7 Days Activity</h3>
-                    <p className="text-xs text-gray-500 mb-4">Lessons created per day</p>
+                {/* Activity */}
+                <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5">
+                    <h3 className="text-lg font-semibold text-base-content">Last 7 Days Activity</h3>
+                    <p className="text-xs text-base-content/60 mb-4">Lessons created per day</p>
 
                     <div className="space-y-2">
                         {(stats.last7Days || []).map((d) => {
                             const width = Math.round(((d.count || 0) / maxCount) * 100);
                             return (
                                 <div key={d.date} className="flex items-center gap-3">
-                                    <span className="w-24 text-xs text-gray-600">{d.date}</span>
-                                    <div className="flex-1 h-3 bg-gray-100 rounded">
-                                        <div className="h-3 bg-orange-400 rounded" style={{ width: `${width}%` }} />
+                                    <span className="w-24 text-xs text-base-content/70">{d.date}</span>
+
+                                    <div className="flex-1 h-3 bg-base-200 rounded">
+                                        <div
+                                            className="h-3 bg-primary rounded"
+                                            style={{ width: `${width}%` }}
+                                        />
                                     </div>
-                                    <span className="w-8 text-right text-xs font-semibold">{d.count || 0}</span>
+
+                                    <span className="w-8 text-right text-xs font-semibold text-base-content">
+                                        {d.count || 0}
+                                    </span>
                                 </div>
                             );
                         })}
@@ -152,22 +157,27 @@ const UserHome = () => {
                 </div>
 
                 {/* Recent lessons */}
-                <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-5">
-                    <h3 className="text-lg font-semibold">Recent Lessons</h3>
-                    <p className="text-xs text-gray-500 mb-4">Your latest lessons</p>
+                <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5">
+                    <h3 className="text-lg font-semibold text-base-content">Recent Lessons</h3>
+                    <p className="text-xs text-base-content/60 mb-4">Your latest lessons</p>
 
                     <div className="space-y-3">
                         {stats.recentLessons?.map((l) => (
-                            <div key={l._id} className="p-3 rounded-lg border border-gray-100 hover:border-orange-200">
-                                <p className="font-semibold">{l.title}</p>
-                                <p className="text-xs text-gray-500 mt-1">
+                            <div
+                                key={l._id}
+                                className="p-3 rounded-xl border border-base-300 bg-base-100 hover:bg-base-200/60 transition"
+                            >
+                                <p className="font-semibold text-base-content">{l.title}</p>
+                                <p className="text-xs text-base-content/60 mt-1">
                                     {l.category} • {l.emotionalTone} • {l.accessLevel}
                                 </p>
                             </div>
                         ))}
 
                         {(!stats.recentLessons || stats.recentLessons.length === 0) && (
-                            <p className="text-sm text-gray-500">No lessons found yet. Create your first one!</p>
+                            <p className="text-sm text-base-content/60">
+                                No lessons found yet. Create your first one!
+                            </p>
                         )}
                     </div>
                 </div>

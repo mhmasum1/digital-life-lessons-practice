@@ -1,59 +1,107 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import SocialLogin from './SocialLogin';
-import useAuth from '../../hooks/useAuth';
-
+import { useForm } from "react-hook-form";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import SocialLogin from "./SocialLogin";
+import useAuth from "../../hooks/useAuth";
+import toast from "react-hot-toast";
 
 const Login = () => {
-    const { register, handleSubmit, formState: { errors } } = useForm();
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm();
+
     const { signInUser } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
 
-
-    const handleLogin = (data) => {
-        console.log('form data', data);
-        signInUser(data.email, data.password)
-            .then(result => {
-                console.log(result.user)
-                navigate(location?.state || '/')
-            })
-            .catch(error => {
-                console.log(error)
-            })
-    }
+    const handleLogin = async (data) => {
+        try {
+            await signInUser(data.email, data.password);
+            toast.success("Login successful");
+            navigate(location?.state || "/", { replace: true });
+        } catch (error) {
+            console.error(error);
+            toast.error(error?.message || "Login failed");
+        }
+    };
 
     return (
-        <div className="card bg-base-100 w-full mx-auto max-w-sm shrink-0 shadow-2xl">
-            <h3 className="text-2xl text-center">Welcome back</h3>
-            <p className='text-center'>Please Login</p>
+        <div className="card bg-base-100 w-full mx-auto max-w-sm shrink-0 shadow-2xl border border-base-300">
+            <h3 className="text-2xl text-center text-base-content pt-5">
+                Welcome back
+            </h3>
+            <p className="text-center text-base-content/70">
+                Please Login
+            </p>
+
             <form className="card-body" onSubmit={handleSubmit(handleLogin)}>
-                <fieldset className="fieldset">
-                    {/* email field */}
-                    <label className="label">Email</label>
-                    <input type="email" {...register('email', { required: true })} className="input" placeholder="Email" />
-                    {
-                        errors.email?.type === 'required' && <p className='text-red-500'>Email is required</p>
-                    }
+                <fieldset className="fieldset space-y-2">
 
-                    {/* password field */}
-                    <label className="label">Password</label>
-                    <input type="password" {...register('password', { required: true, minLength: 6 })} className="input" placeholder="Password" />
-                    {
-                        errors.password?.type === 'minLength' && <p className='text-red-500'>Password must be 6 characters  or longer </p>
-                    }
+                    {/* Email */}
+                    <label className="label">
+                        <span className="label-text">Email</span>
+                    </label>
+                    <input
+                        type="email"
+                        {...register("email", {
+                            required: "Email is required",
+                        })}
+                        className="input input-bordered w-full"
+                        placeholder="Email"
+                    />
+                    {errors.email && (
+                        <p className="text-error text-sm">
+                            {errors.email.message}
+                        </p>
+                    )}
 
+                    {/* Password */}
+                    <label className="label">
+                        <span className="label-text">Password</span>
+                    </label>
+                    <input
+                        type="password"
+                        {...register("password", {
+                            required: "Password is required",
+                            minLength: {
+                                value: 6,
+                                message: "Password must be at least 6 characters",
+                            },
+                        })}
+                        className="input input-bordered w-full"
+                        placeholder="Password"
+                    />
+                    {errors.password && (
+                        <p className="text-error text-sm">
+                            {errors.password.message}
+                        </p>
+                    )}
 
-                    <div><a className="link link-hover">Forgot password?</a></div>
-                    <button className="btn btn-neutral mt-4">Login</button>
+                    <div>
+                        <a className="link link-hover text-base-content/70">
+                            Forgot password?
+                        </a>
+                    </div>
+
+                    <button className="btn btn-primary mt-3 w-full">
+                        Login
+                    </button>
                 </fieldset>
-                <p>New to Digital Life Lessons  <Link
-                    state={location.state}
-                    className='text-blue-400 underline ml-2'
-                    to="/register">Register</Link></p>
+
+                <p className="text-sm text-base-content/70 mt-4">
+                    New to Digital Life Lessons?
+                    <Link
+                        state={location.state}
+                        className="link link-primary ml-2"
+                        to="/register"
+                    >
+                        Register
+                    </Link>
+                </p>
             </form>
-            <SocialLogin></SocialLogin>
+
+            <SocialLogin />
         </div>
     );
 };

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 
-
 const UpdateLesson = () => {
     const { id } = useParams();
     const axiosSecure = useAxiosSecure();
@@ -66,24 +65,24 @@ const UpdateLesson = () => {
     if (loading) {
         return (
             <div className="max-w-3xl mx-auto">
-                <p className="text-sm text-gray-600">Loading lesson...</p>
+                <p className="text-sm text-base-content/70">Loading lesson...</p>
             </div>
         );
     }
 
     return (
         <div className="max-w-3xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            <h1 className="text-2xl font-bold text-base-content mb-4">
                 Update Life Lesson
             </h1>
 
             <form
                 onSubmit={handleSubmit}
-                className="space-y-4 bg-base-100 p-6 rounded-xl shadow-sm border border-orange-100"
+                className="space-y-4 bg-base-100 p-6 rounded-2xl shadow-sm border border-base-300"
             >
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Lesson title *
+                    <label className="block text-sm font-medium text-base-content mb-1">
+                        Lesson title <span className="text-error">*</span>
                     </label>
                     <input
                         type="text"
@@ -91,13 +90,13 @@ const UpdateLesson = () => {
                         value={formData.title}
                         onChange={handleChange}
                         required
-                        className="input input-bordered w-full text-sm"
+                        className="input input-bordered w-full text-sm bg-base-100 text-base-content border-base-300"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Short description (preview) *
+                    <label className="block text-sm font-medium text-base-content mb-1">
+                        Short description (preview) <span className="text-error">*</span>
                     </label>
                     <textarea
                         name="shortDescription"
@@ -105,12 +104,12 @@ const UpdateLesson = () => {
                         onChange={handleChange}
                         required
                         rows={3}
-                        className="textarea textarea-bordered w-full text-sm"
+                        className="textarea textarea-bordered w-full text-sm bg-base-100 text-base-content border-base-300"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-base-content mb-1">
                         Full story / lesson details
                     </label>
                     <textarea
@@ -118,20 +117,20 @@ const UpdateLesson = () => {
                         value={formData.details}
                         onChange={handleChange}
                         rows={6}
-                        className="textarea textarea-bordered w-full text-sm"
+                        className="textarea textarea-bordered w-full text-sm bg-base-100 text-base-content border-base-300"
                     />
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-base-content mb-1">
                             Category
                         </label>
                         <select
                             name="category"
                             value={formData.category}
                             onChange={handleChange}
-                            className="select select-bordered w-full text-sm"
+                            className="select select-bordered w-full text-sm bg-base-100 text-base-content border-base-300"
                         >
                             <option>Self-Growth</option>
                             <option>Productivity</option>
@@ -143,14 +142,14 @@ const UpdateLesson = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-base-content mb-1">
                             Emotional tone
                         </label>
                         <select
                             name="emotionalTone"
                             value={formData.emotionalTone}
                             onChange={handleChange}
-                            className="select select-bordered w-full text-sm"
+                            className="select select-bordered w-full text-sm bg-base-100 text-base-content border-base-300"
                         >
                             <option>Reflective</option>
                             <option>Hopeful</option>
@@ -161,14 +160,14 @@ const UpdateLesson = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-base-content mb-1">
                             Access level
                         </label>
                         <select
                             name="accessLevel"
                             value={formData.accessLevel}
                             onChange={handleChange}
-                            className="select select-bordered w-full text-sm"
+                            className="select select-bordered w-full text-sm bg-base-100 text-base-content border-base-300"
                         >
                             <option value="free">Free</option>
                             <option value="premium">Premium</option>
@@ -178,14 +177,14 @@ const UpdateLesson = () => {
 
                 <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-base-content mb-1">
                             Visibility
                         </label>
                         <select
                             name="visibility"
                             value={formData.visibility}
                             onChange={handleChange}
-                            className="select select-bordered w-full text-sm"
+                            className="select select-bordered w-full text-sm bg-base-100 text-base-content border-base-300"
                         >
                             <option value="public">Public</option>
                             <option value="private">Private</option>
@@ -201,10 +200,11 @@ const UpdateLesson = () => {
                     >
                         Cancel
                     </button>
+
                     <button
                         type="submit"
                         disabled={saving}
-                        className="btn btn-sm bg-primary text-white hover:bg-orange-500 border-none"
+                        className="btn btn-primary btn-sm"
                     >
                         {saving ? "Updating..." : "Update Lesson"}
                     </button>

@@ -54,9 +54,7 @@ const Profile = () => {
         };
     }, [user?.email, axiosSecure]);
 
-    const totalCreated = useMemo(() => {
-        return myPublicLessons.length;
-    }, [myPublicLessons]);
+    const totalCreated = useMemo(() => myPublicLessons.length, [myPublicLessons]);
 
     const totalSaved = useMemo(() => {
         return dbUser?.savedCount ?? dbUser?.totalFavorites ?? null;
@@ -75,7 +73,7 @@ const Profile = () => {
             let photoURL = user?.photoURL || dbUser?.photoURL || "";
 
             if (photoFile) {
-                const key = import.meta.env.VITE_photo_host_key; // your env key name
+                const key = import.meta.env.VITE_photo_host_key;
                 if (!key) {
                     toast.error("VITE_photo_host_key missing in .env");
                     setSaving(false);
@@ -90,13 +88,8 @@ const Profile = () => {
                 photoURL = uploadRes?.data?.data?.url || photoURL;
             }
 
-            //Update Firebase profile
-            await updateUserProfile({
-                displayName: finalName,
-                photoURL,
-            });
+            await updateUserProfile({ displayName: finalName, photoURL });
 
-            //Update DB user 
             await axiosSecure.post("/users", {
                 email: user.email,
                 displayName: finalName,
@@ -117,10 +110,11 @@ const Profile = () => {
 
     return (
         <div className="p-4 md:p-6 space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            {/* Header */}
+            <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-semibold">My Profile</h1>
-                    <p className="text-sm text-gray-600">Manage your profile information</p>
+                    <h1 className="text-2xl font-semibold text-base-content">My Profile</h1>
+                    <p className="text-sm text-base-content/70">Manage your profile information</p>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -135,35 +129,37 @@ const Profile = () => {
 
             {/* Profile card */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-5">
+                <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5">
                     <div className="flex items-center gap-3">
                         {user?.photoURL ? (
                             <img
                                 src={user.photoURL}
                                 alt="avatar"
-                                className="w-14 h-14 rounded-full border object-cover"
+                                className="w-14 h-14 rounded-full border border-base-300 object-cover"
                                 referrerPolicy="no-referrer"
                             />
                         ) : (
-                            <div className="w-14 h-14 rounded-full border flex items-center justify-center font-bold">
+                            <div className="w-14 h-14 rounded-full border border-base-300 flex items-center justify-center font-bold text-base-content">
                                 {(user?.displayName?.[0] || user?.email?.[0] || "U").toUpperCase()}
                             </div>
                         )}
 
                         <div className="leading-tight">
-                            <p className="font-semibold">{user?.displayName || dbUser?.name || "User"}</p>
-                            <p className="text-xs opacity-70">{user?.email}</p>
+                            <p className="font-semibold text-base-content">
+                                {user?.displayName || dbUser?.name || "User"}
+                            </p>
+                            <p className="text-xs text-base-content/60">{user?.email}</p>
                         </div>
                     </div>
 
                     <div className="mt-4 grid grid-cols-2 gap-3">
-                        <div className="rounded-lg border p-3">
-                            <p className="text-xs text-gray-500">Public Lessons</p>
-                            <p className="text-xl font-bold">{totalCreated}</p>
+                        <div className="rounded-xl border border-base-300 p-3 bg-base-200">
+                            <p className="text-xs text-base-content/60">Public Lessons</p>
+                            <p className="text-xl font-bold text-base-content">{totalCreated}</p>
                         </div>
-                        <div className="rounded-lg border p-3">
-                            <p className="text-xs text-gray-500">Saved</p>
-                            <p className="text-xl font-bold">{totalSaved ?? "-"}</p>
+                        <div className="rounded-xl border border-base-300 p-3 bg-base-200">
+                            <p className="text-xs text-base-content/60">Saved</p>
+                            <p className="text-xl font-bold text-base-content">{totalSaved ?? "-"}</p>
                         </div>
                     </div>
 
@@ -175,15 +171,15 @@ const Profile = () => {
                 </div>
 
                 {/* update form */}
-                <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-orange-100 p-5">
-                    <h2 className="text-lg font-semibold mb-3">Update Profile</h2>
+                <div className="lg:col-span-2 bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5">
+                    <h2 className="text-lg font-semibold mb-3 text-base-content">Update Profile</h2>
 
                     <form onSubmit={handleUpdateProfile} className="space-y-4">
                         <div>
-                            <label className="text-sm font-medium">Display Name</label>
+                            <label className="text-sm font-medium text-base-content">Display Name</label>
                             <input
                                 type="text"
-                                className="input input-bordered w-full mt-1"
+                                className="input input-bordered w-full mt-1 bg-base-100 text-base-content border-base-300"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 placeholder="Your name"
@@ -191,14 +187,14 @@ const Profile = () => {
                         </div>
 
                         <div>
-                            <label className="text-sm font-medium">Photo</label>
+                            <label className="text-sm font-medium text-base-content">Photo</label>
                             <input
                                 type="file"
                                 accept="image/*"
-                                className="file-input file-input-bordered w-full mt-1"
+                                className="file-input file-input-bordered w-full mt-1 bg-base-100 text-base-content border-base-300"
                                 onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
                             />
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p className="text-xs text-base-content/60 mt-1">
                                 Optional. JPG/PNG recommended.
                             </p>
                         </div>
@@ -211,10 +207,10 @@ const Profile = () => {
             </div>
 
             {/* Public lessons */}
-            <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-5">
+            <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5">
                 <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-lg font-semibold">My Public Lessons</h2>
-                    <Link to="/dashboard/my-lessons" className="text-sm text-orange-600 hover:underline">
+                    <h2 className="text-lg font-semibold text-base-content">My Public Lessons</h2>
+                    <Link to="/dashboard/my-lessons" className="text-sm text-primary hover:underline">
                         Manage lessons →
                     </Link>
                 </div>
@@ -222,9 +218,9 @@ const Profile = () => {
                 {loadingLessons ? (
                     <Spinner />
                 ) : myPublicLessons.length === 0 ? (
-                    <div className="border border-orange-100 bg-[#FFF7ED] rounded-xl p-6 text-center">
-                        <p className="font-medium mb-1">No public lessons yet.</p>
-                        <p className="text-sm text-gray-600 mb-3">
+                    <div className="border border-base-300 bg-base-200 rounded-2xl p-6 text-center">
+                        <p className="font-medium mb-1 text-base-content">No public lessons yet.</p>
+                        <p className="text-sm text-base-content/70 mb-3">
                             Make a lesson public from “My Lessons” or create a new one.
                         </p>
                         <Link to="/dashboard/add-lesson" className="btn btn-sm btn-primary">
@@ -234,12 +230,17 @@ const Profile = () => {
                 ) : (
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {myPublicLessons.map((l) => (
-                            <div key={l._id} className="rounded-xl border p-4 hover:shadow-sm transition">
-                                <p className="font-semibold line-clamp-2">{l.title}</p>
-                                <p className="text-xs text-gray-500 mt-1">
+                            <div
+                                key={l._id}
+                                className="rounded-2xl border border-base-300 bg-base-100 p-4 hover:shadow-sm transition"
+                            >
+                                <p className="font-semibold line-clamp-2 text-base-content">{l.title}</p>
+                                <p className="text-xs text-base-content/60 mt-1">
                                     {l.category} • {l.emotionalTone} • {l.accessLevel}
                                 </p>
-                                <p className="text-sm text-gray-700 mt-2 line-clamp-3">{l.shortDescription}</p>
+                                <p className="text-sm text-base-content/80 mt-2 line-clamp-3">
+                                    {l.shortDescription}
+                                </p>
 
                                 <div className="mt-3 flex gap-2">
                                     <Link to={`/lessons/${l._id}`} className="btn btn-xs">
