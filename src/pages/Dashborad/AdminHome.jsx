@@ -71,13 +71,13 @@ const GrowthCard = ({ title, data }) => {
     const strokeColor = p ? `hsl(${p})` : "#ff6b00";
 
     return (
-        <div className="bg-base-100 border border-base-300 rounded-2xl p-5 shadow-sm min-w-0">
+        <div className="bg-base-100 border border-base-300 rounded-2xl p-5 shadow-sm min-w-0 overflow-hidden">
             <h3 className="font-semibold mb-3 text-base-content">{title}</h3>
 
             {!chartData.length ? (
                 <p className="text-sm text-base-content/60">No chart data.</p>
             ) : (
-                <div className="h-56 w-full">
+                <div style={{ width: "100%", height: 224 }}>
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={chartData}>
                             <CartesianGrid strokeDasharray="3 3" opacity={0.35} />
