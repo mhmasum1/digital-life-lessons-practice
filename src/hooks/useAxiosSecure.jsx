@@ -10,7 +10,7 @@ axiosSecure.interceptors.request.use(
         const currentUser = auth.currentUser;
 
         if (currentUser) {
-            const token = await currentUser.getIdToken(true);
+            const token = await currentUser.getIdToken();
             localStorage.setItem("fb-token", token);
             config.headers.authorization = `Bearer ${token}`;
         } else {

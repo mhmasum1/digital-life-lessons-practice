@@ -67,8 +67,13 @@ const GrowthCard = ({ title, data }) => {
         [data]
     );
 
-    const p = getComputedStyle(document.documentElement).getPropertyValue("--p")?.trim();
-    const strokeColor = p ? `hsl(${p})` : "#ff6b00";
+    const strokeColor = useMemo(() => {
+        if (typeof window === "undefined") return "#ff6b00";
+        const p = getComputedStyle(document.documentElement)
+            .getPropertyValue("--p")
+            ?.trim();
+        return p ? `hsl(${p})` : "#ff6b00";
+    }, []);
 
     return (
         <div className="bg-base-100 border border-base-300 rounded-2xl p-5 shadow-sm min-w-0 overflow-hidden">
