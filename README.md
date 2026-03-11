@@ -1,83 +1,144 @@
 📘 Digital Life Lessons
 
-Digital Life Lessons is a full-stack web platform where users can create, save, and share meaningful life lessons, personal growth insights, and real-world wisdom.
-The platform encourages reflection, learning from experiences, and community-driven growth.
+Digital Life Lessons is a full-stack web platform where users can create, save, and share meaningful life lessons, personal growth insights, and real-world wisdom. The platform encourages reflection, learning from experiences, and community-driven growth.
 
-🌐 Live Website:
+🌐 Live Website
+
 👉 https://digital-life-lessons-b2d6b.web.app
 
-🔗 Client Repository:
+🔗 GitHub Repositories
+
+Frontend (Client):
 👉 https://github.com/mhmasum1/digital-life-lessons
 
-🔗 Server Repository:
+Backend (Server):
 👉 https://github.com/mhmasum1/digital-life-lessons-server
 
-🚀 Key Features
+🔑 Demo Credentials
+👤 User Account
 
+Email: demo@demo.com
+
+Password: Demo@1234
+
+🛠 Admin Account
+
+Email: admin@gmail.com
+
+Password: Admin@107
+
+🚀 Project Overview
+
+Digital Life Lessons is designed to allow users to:
+
+Share personal experiences
+
+Reflect on life events
+
+Learn from others
+
+Engage with community-driven content
+
+It supports both Free and Premium content models with secure authentication and role-based access control.
+
+✨ Key Features
 🔐 Authentication & Authorization
 
-Email & Password login
+Email & Password Login
 
-Google authentication
+Google Login
 
-Firebase token verification on protected routes
+Firebase Authentication
+
+Firebase Token Verification on Protected Routes
+
+Role-based access (User / Admin)
 
 📝 Life Lesson Management
 
-Create, update, and delete life lessons
+Create new lessons
+
+Update & delete own lessons
 
 Set lesson visibility (Public / Private)
 
-Choose access level (Free / Premium)
+Set access level (Free / Premium)
 
 🌍 Public Lessons Browsing
 
-Browse all public lessons without login
+Browse public lessons without login
 
-Search by title or keyword
+Search by title/keyword
 
-Filter by category and emotional tone
+Filter by category & emotional tone
 
-Sort by newest or most saved
+Sort by newest / most saved
 
 Pagination support
 
 ⭐ Premium System
 
-Free vs Premium access control
+One-time Stripe payment (৳1500 – Lifetime)
 
-Stripe one-time payment (৳1500 – lifetime)
+Premium lessons locked for free users
 
-Premium lessons locked for free users with upgrade prompt
+Instant upgrade after successful payment
 
 ❤️ User Engagement
 
 Like lessons
 
-Save lessons to Favorites
+Save to favorites
 
-Comment on lessons
+Comment system
 
-Report inappropriate content
+Report inappropriate lessons
 
-📊 Dashboard (User & Admin)
+📊 Dashboard System
+User Dashboard
 
-User dashboard with stats and shortcuts
+Personal stats
 
-Admin dashboard for managing users & lessons
+Quick navigation
 
-Reported/flagged lessons moderation
+Manage lessons
 
-Featured lessons control
+Manage favorites
+
+Admin Dashboard
+
+View platform stats
+
+Manage users
+
+Moderate reported lessons
+
+Control featured lessons
+
+💳 Payment Flow
+
+User clicks Upgrade to Premium
+
+Redirected to Stripe Checkout
+
+On successful payment:
+
+User role updated in MongoDB
+
+Premium access unlocked
+
+Cancel redirects to cancel page
 
 🧑‍💻 Tech Stack
-Frontend
+🎨 Frontend
 
 React
 
 React Router
 
-Tailwind CSS + DaisyUI
+Tailwind CSS
+
+DaisyUI
 
 Firebase Authentication
 
@@ -85,9 +146,11 @@ Axios
 
 Lottie React
 
-SweetAlert2 & React Hot Toast
+React Hot Toast
 
-Backend
+SweetAlert2
+
+⚙ Backend
 
 Node.js
 
@@ -97,7 +160,7 @@ MongoDB
 
 Firebase Admin SDK
 
-Stripe Payment Gateway
+Stripe API
 
 JWT & Firebase Token Verification
 
@@ -107,13 +170,13 @@ Environment variables used for all secrets
 
 Firebase Admin SDK for secure token verification
 
-Role-based access control (User / Admin)
+Role-based access control
 
-Only lesson owner or admin can edit/delete lessons
+Only lesson owner or admin can modify content
 
-CORS configured properly for production deployment
+Proper CORS configuration for production
 
-📂 Main Pages & Routes
+📂 Main Routes
 
 Home
 
@@ -129,7 +192,7 @@ My Lessons (Protected)
 
 My Favorites (Protected)
 
-Pricing / Upgrade (Protected)
+Pricing / Upgrade
 
 User Dashboard
 
@@ -141,31 +204,32 @@ Reported Lessons (Admin)
 
 Access Denied
 
-💳 Payment Flow
+📱 UI & Responsiveness
 
-User clicks Upgrade to Premium
+Fully responsive (Mobile, Tablet, Desktop)
 
-Redirected to Stripe Checkout
+Modern and clean UI
 
-Successful payment updates user plan in MongoDB
+Consistent card layout
 
-Premium access unlocked instantly
+Smooth loading states
 
-Cancelled payment redirects to cancel page
+Optimized user experience
 
-📱 Responsiveness & UI
-
-Fully responsive for mobile, tablet, and desktop
-
-Clean, modern UI with consistent spacing and typography
-
-Uniform card layouts and button styles
-
-Smooth user experience with loading spinners and animations
-
-📌 Author
+🛠 Installation (For Local Setup)
+Frontend
+git clone https://github.com/mhmasum1/digital-life-lessons
+cd digital-life-lessons
+npm install
+npm run dev
+Backend
+git clone https://github.com/mhmasum1/digital-life-lessons-server
+cd digital-life-lessons-server
+npm install
+npm run dev
+👨‍💻 Author
 
 Mahmudul Hasan Masum
-Frontend & Full-Stack Developer
+Full-Stack Developer
 
 GitHub: https://github.com/mhmasum1
