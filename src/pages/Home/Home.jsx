@@ -6,6 +6,8 @@ import TopContributors from "../../home/TopContributors";
 import WhyLearningMatters from "../../home/WhyLearningMatters";
 import MostSavedLessons from "../../home/MostSavedLessons";
 import StatisticsSection from "./StatisticsSection";
+import CategoriesSection from "./CategoriesSection";
+import HowItWorksSection from "./HowItWorksSection";
 
 const Home = () => {
     const axiosSecure = useAxiosSecure();
@@ -69,7 +71,9 @@ const Home = () => {
         <div className="bg-base-100">
             <HeroSlider />
             <StatisticsSection stats={stats} />
+            <CategoriesSection />
             <FeaturedLessons lessons={featuredLessons} />
+            <HowItWorksSection />
             <WhyLearningMatters />
             <TopContributors contributors={topContributors} />
             <MostSavedLessons lessons={mostSavedLessons} />
