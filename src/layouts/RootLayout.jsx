@@ -7,8 +7,10 @@ const RootLayout = () => {
         <div className="min-h-screen flex flex-col bg-base-100 text-base-content">
             <Navbar />
 
-            <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-6">
-                <Outlet />
+            <main className="flex-1 w-full">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                    <Outlet />
+                </div>
             </main>
 
             <Footer />

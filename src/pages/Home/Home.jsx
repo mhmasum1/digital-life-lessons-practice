@@ -69,7 +69,11 @@ const Home = () => {
 
     return (
         <div className="bg-base-100">
-            <HeroSlider />
+
+            <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-6">
+                <HeroSlider />
+            </div>
+
             <StatisticsSection stats={stats} />
             <CategoriesSection />
             <FeaturedLessons lessons={featuredLessons} />
@@ -77,6 +81,7 @@ const Home = () => {
             <WhyLearningMatters />
             <TopContributors contributors={topContributors} />
             <MostSavedLessons lessons={mostSavedLessons} />
+
         </div>
     );
 };

@@ -37,7 +37,7 @@ axiosSecure.interceptors.response.use(
                     const freshToken = await currentUser.getIdToken(true);
                     localStorage.setItem("fb-token", freshToken);
                     originalRequest.headers.authorization = `Bearer ${freshToken}`;
-                    return axiosSecure(originalRequest); // retry
+                    return axiosSecure(originalRequest);
                 }
             } catch {
                 localStorage.removeItem("fb-token");
