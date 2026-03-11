@@ -5,6 +5,7 @@ import FeaturedLessons from "../../home/FeaturedLessons";
 import TopContributors from "../../home/TopContributors";
 import WhyLearningMatters from "../../home/WhyLearningMatters";
 import MostSavedLessons from "../../home/MostSavedLessons";
+import StatisticsSection from "./StatisticsSection";
 
 const Home = () => {
     const axiosSecure = useAxiosSecure();
@@ -12,6 +13,12 @@ const Home = () => {
     const [featuredLessons, setFeaturedLessons] = useState([]);
     const [topContributors, setTopContributors] = useState([]);
     const [mostSavedLessons, setMostSavedLessons] = useState([]);
+    const [stats, setStats] = useState({
+        totalLessons: 0,
+        publicLessons: 0,
+        totalContributors: 0,
+        totalUsers: 0,
+    });
 
     const safeArray = (data) => {
         if (Array.isArray(data)) return data;
@@ -35,11 +42,33 @@ const Home = () => {
             .get("/lessons/most-saved")
             .then((res) => setMostSavedLessons(safeArray(res.data)))
             .catch(() => setMostSavedLessons([]));
+
+        axiosSecure
+            .get("/stats/home")
+            .then((res) =>
+                setStats(
+                    res.data || {
+                        totalLessons: 0,
+                        publicLessons: 0,
+                        totalContributors: 0,
+                        totalUsers: 0,
+                    }
+                )
+            )
+            .catch(() =>
+                setStats({
+                    totalLessons: 0,
+                    publicLessons: 0,
+                    totalContributors: 0,
+                    totalUsers: 0,
+                })
+            );
     }, [axiosSecure]);
 
     return (
-        <div className="bg-white">
+        <div className="bg-base-100">
             <HeroSlider />
+            <StatisticsSection stats={stats} />
             <FeaturedLessons lessons={featuredLessons} />
             <WhyLearningMatters />
             <TopContributors contributors={topContributors} />
