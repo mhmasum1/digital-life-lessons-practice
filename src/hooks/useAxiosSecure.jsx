@@ -23,6 +23,11 @@ axiosSecure.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
+
+// token expire হল ❌
+// API call করলেন → server 401 দিল
+// → interceptor ধরল → নতুন token নিল → আবার try করল ✅
+// → user কিছুই বুঝল না, কাজ হয়ে গেল
 axiosSecure.interceptors.response.use(
     (res) => res,
     async (error) => {
@@ -41,7 +46,7 @@ axiosSecure.interceptors.response.use(
                 }
             } catch {
                 localStorage.removeItem("fb-token");
-                window.location.href = "/auth/login";
+                window.location.href = "/login";
             }
         }
 

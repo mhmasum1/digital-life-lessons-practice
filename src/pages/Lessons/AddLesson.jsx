@@ -31,18 +31,9 @@ const AddLesson = () => {
         }
     }, [isPremiumUser, accessLevel]);
 
-    if (!user?.email) {
-        return <Navigate to="/auth/login" replace />;
-    }
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!user?.email) return;
-
-        if (!isPremiumUser && accessLevel === "premium") {
-            toast.error("Upgrade to Premium to create Premium lessons");
-            return;
-        }
 
         const form = e.target;
 
@@ -246,13 +237,7 @@ const AddLesson = () => {
                                 name="accessLevel"
                                 value="premium"
                                 checked={accessLevel === "premium"}
-                                onChange={() => {
-                                    if (!isPremiumUser) {
-                                        toast.error("Upgrade to Premium to create Premium lessons");
-                                        return;
-                                    }
-                                    setAccessLevel("premium");
-                                }}
+                                onChange={() => setAccessLevel("premium")}
                                 disabled={!isPremiumUser}
                             />
                             <span>Premium lesson</span>
