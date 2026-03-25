@@ -17,6 +17,12 @@ const MyLesson = () => {
     const [lessons, setLessons] = useState([]);
     const [rowLoading, setRowLoading] = useState({});
 
+    // শুধু একটা specific row কে busy/not-busy করে
+    // বাকি rows এ কোনো effect নেই
+
+    // Example:
+    // setThisRowLoading("abc123", true)
+    // rowLoading = { "abc123": true }
     const setThisRowLoading = (lessonId, value) => {
         setRowLoading((prev) => ({ ...prev, [lessonId]: value }));
     };
@@ -26,7 +32,11 @@ const MyLesson = () => {
 
         try {
             setLoading(true);
+
+            // GET request — এই user এর lessons আনে
             const res = await axiosSecure.get(`/lessons/my?email=${user.email}`);
+
+            // array হলে set করো, না হলে empty array
             setLessons(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error(err);
@@ -34,21 +44,29 @@ const MyLesson = () => {
         } finally {
             setLoading(false);
         }
+
+        // dependency — এগুলো change হলে function নতুন হবে
     }, [axiosSecure, user?.email]);
 
     useEffect(() => {
         fetchMyLessons();
+
+        // component mount হলে একবার fetch করে
     }, [fetchMyLessons]);
 
     // Delete
     const handleDelete = async (lessonId) => {
         const ok = window.confirm("Are you sure you want to delete this lesson?");
         if (!ok) return;
+        // cancel করলে বন্ধ
 
         try {
+            // ঐ row টা busy করো
             setThisRowLoading(lessonId, true);
+            // database থেকে delete
             await axiosSecure.delete(`/lessons/my/${lessonId}`);
-            setLessons((prev) => prev.filter((l) => l._id !== lessonId));
+            // state থেকেও সরিয়ে দাও — UI update
+            setLessons((prev) => prev.filter((lesson) => lesson._id !== lessonId));
             toast.success("Lesson deleted");
         } catch (err) {
             console.error(err);
@@ -60,10 +78,14 @@ const MyLesson = () => {
 
     // Update visibility
     const handleVisibilityChange = async (lessonId, nextValue) => {
+
+        // আগের state backup রাখো (error হলে rollback করবো)
         const prevLessons = lessons;
 
+        // Optimistic update — আগেই UI change করো, API পরে
+
         setLessons((prev) =>
-            prev.map((l) => (l._id === lessonId ? { ...l, visibility: nextValue } : l))
+            prev.map((lesson) => (lesson._id === lessonId ? { ...lesson, visibility: nextValue } : lesson))
         );
 
         try {
@@ -81,6 +103,8 @@ const MyLesson = () => {
 
     // Update access
     const handleAccessChange = async (lessonId, nextValue) => {
+
+        // premium না হলে block করো
         if (!isPremiumUser && nextValue === "premium") {
             toast.error("Upgrade to Premium to create Premium lessons");
             return;
@@ -89,7 +113,7 @@ const MyLesson = () => {
         const prevLessons = lessons;
 
         setLessons((prev) =>
-            prev.map((l) => (l._id === lessonId ? { ...l, accessLevel: nextValue } : l))
+            prev.map((lesson) => (lesson._id === lessonId ? { ...lesson, accessLevel: nextValue } : lesson))
         );
 
         try {
@@ -144,10 +168,27 @@ const MyLesson = () => {
 
                         <tbody>
                             {lessons.map((lesson) => {
+                                //  ↑ lessons array এর প্রতিটা item এর জন্য
+                                //    একটা করে <tr> বানাবে
                                 const busy = !!rowLoading[lesson._id];
+                                // এই specific lesson টা কি এখন busy?
+                                // delete/update হচ্ছে কিনা check করে
+
+                                // <tr key={lesson._id} className="border-t border-base-300"></tr>
+                                //↑ প্রতিটা row এর unique id
+                                // React এর জন্য দরকার — কোন row কোনটা চেনে
+                                //↑ উপরে border line দেখায়
+
+                                // <span className="truncate max-w-[360px]">{lesson.title}</span>
+                                //↑ database থেকে আসা title
+                                //truncate — বড় title ... দিয়ে কাটে
 
                                 return (
                                     <tr key={lesson._id} className="border-t border-base-300">
+
+
+                                        {/* Title & private hole title er pase Private show korano */}
+
                                         <td className="p-3 font-medium text-base-content">
                                             <div className="flex items-center gap-2">
                                                 <span className="truncate max-w-[360px]">{lesson.title}</span>
@@ -155,6 +196,7 @@ const MyLesson = () => {
                                                 {lesson.visibility === "private" && (
                                                     <span className="badge badge-ghost badge-sm">Private</span>
                                                 )}
+                                                {/* private → badge দেখাও ✅ */}
 
                                                 {busy && (
                                                     <span className="text-[11px] text-base-content/50">
@@ -164,35 +206,41 @@ const MyLesson = () => {
                                             </div>
                                         </td>
 
+                                        {/* Category */}
                                         <td className="p-3 text-base-content/80">{lesson.category || "-"}</td>
 
+                                        {/* Access */}
                                         <td className="p-3">
                                             <select
                                                 className="select select-bordered select-xs bg-base-100 text-base-content border-base-300"
                                                 value={lesson.accessLevel || "free"}
+                                                //     ↑ current value database থেকে
+                                                //       null হলে default "free"
                                                 disabled={busy}
+                                                //  ↑ busy হলে dropdown change করা যাবে না
                                                 onChange={(e) => handleAccessChange(lesson._id, e.target.value)}
+                                                //  ↑ change হলে → lesson id আর নতুন value পাঠাও handler এ
+
                                                 title={!isPremiumUser ? "Upgrade to Premium to set Premium access" : ""}
+                                            //  ↑ hover করলে tooltip দেখায়
                                             >
                                                 <option value="free">free</option>
                                                 <option value="premium" disabled={!isPremiumUser}>
                                                     premium
                                                 </option>
+                                                {/* //  ↑ premium option — non-premium user এর জন্য disabled */}
                                             </select>
-
-                                            {!isPremiumUser && (
-                                                <p className="text-[11px] text-base-content/60 mt-1">
-                                                    Upgrade to Premium to set Premium access
-                                                </p>
-                                            )}
                                         </td>
 
+                                        {/* Visibility */}
                                         <td className="p-3">
                                             <select
                                                 className="select select-bordered select-xs bg-base-100 text-base-content border-base-300"
                                                 value={lesson.visibility || "public"}
+                                                // ↑ current visibility database থেকে
                                                 disabled={busy}
                                                 onChange={(e) => handleVisibilityChange(lesson._id, e.target.value)}
+                                            //  ↑ change হলে handler call করো
                                             >
                                                 <option value="public">public</option>
                                                 <option value="private">private</option>
@@ -204,6 +252,9 @@ const MyLesson = () => {
                                         <td className="p-3 text-base-content/80">
                                             {lesson.createdAt ? new Date(lesson.createdAt).toLocaleDateString() : ""}
                                         </td>
+                                        {/* //   ↑ createdAt আছে?
+                                        //     হ্যাঁ → "3/26/2026" এভাবে দেখাও
+                                        //     না  → empty string দেখাও */}
 
                                         <td className="p-3 text-right space-x-2">
                                             <Link to={`/lessons/${lesson._id}`} className="btn btn-xs btn-outline">
