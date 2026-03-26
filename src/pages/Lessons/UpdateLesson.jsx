@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
+import useUserInfo from "../../hooks/useUserInfo";
+
 
 const UpdateLesson = () => {
     const { id } = useParams();
     const axiosSecure = useAxiosSecure();
     const navigate = useNavigate();
+    const { dbUser } = useUserInfo();
+
+    const isPremiumUser = dbUser?.isPremium === true;
 
     const [formData, setFormData] = useState({
         title: "",
@@ -27,15 +32,15 @@ const UpdateLesson = () => {
         axiosSecure
             .get(`/lessons/${id}`)
             .then((res) => {
-                const l = res.data || {};
+                const lesson = res.data || {};
                 setFormData({
-                    title: l.title || "",
-                    shortDescription: l.shortDescription || "",
-                    details: l.details || "",
-                    category: l.category || "Self-Growth",
-                    emotionalTone: l.emotionalTone || "Reflective",
-                    accessLevel: l.accessLevel || "free",
-                    visibility: l.visibility || "public",
+                    title: lesson.title || "",
+                    shortDescription: lesson.shortDescription || "",
+                    details: lesson.details || "",
+                    category: lesson.category || "Self-Growth",
+                    emotionalTone: lesson.emotionalTone || "Reflective",
+                    accessLevel: lesson.accessLevel || "free",
+                    visibility: lesson.visibility || "public",
                 });
             })
             .catch((err) => {
@@ -170,7 +175,7 @@ const UpdateLesson = () => {
                             className="select select-bordered w-full text-sm bg-base-100 text-base-content border-base-300"
                         >
                             <option value="free">Free</option>
-                            <option value="premium">Premium</option>
+                            <option value="premium" disabled={!isPremiumUser}>Premium</option>
                         </select>
                     </div>
                 </div>
