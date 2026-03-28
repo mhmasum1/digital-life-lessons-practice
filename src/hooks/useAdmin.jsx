@@ -24,7 +24,7 @@ const useAdmin = () => {
                 setAdminLoading(true);
                 const res = await axiosSecure.get(`/users/admin/${user.email}`);
                 if (!cancelled) setIsAdmin(Boolean(res?.data?.admin));
-            } catch (e) {
+            } catch {
                 if (!cancelled) setIsAdmin(false);
             } finally {
                 if (!cancelled) setAdminLoading(false);

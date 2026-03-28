@@ -1,3 +1,32 @@
+// AddLesson — Short Plan Note 📝
+
+// কি কি Feature আছে:
+// 1. Lesson Create         → POST /lessons {lessonData}
+// 2. Premium Guard         → non-premium user premium access select করতে পারবে না
+// 3. Access Level Radio    → free/premium (controlled input)
+// 4. Visibility Radio      → public/private (controlled input)
+// 5. Uncontrolled Inputs   → title, description, details, category, tone (form.value দিয়ে নেওয়া)
+// 6. Success Animation     → Lottie animation দেখাও → তারপর redirect
+// 7. Auto Redirect         → 1.6s পরে /dashboard/my-lessons এ যাও
+// 8. Creator Info          → Firebase + dbUser থেকে fallback chain দিয়ে নেওয়া
+
+// State যা যা লাগবে:
+// submitting   → form submit হচ্ছে কিনা
+// accessLevel  → "free" | "premium"
+// visibility   → "public" | "private"
+// showSuccess  → Lottie modal দেখাবে কিনা
+
+// নতুন করে করলে এই Order এ করো:
+// Step 1 → Basic form বানাও (title, description, details)
+// Step 2 → Category + Emotional Tone dropdown যোগ করো
+// Step 3 → Access Level radio যোগ করো
+// Step 4 → Visibility radio যোগ করো
+// Step 5 → Form submit + POST request করো
+// Step 6 → Premium Guard যোগ করো
+// Step 7 → Lottie Success animation যোগ করো
+// Step 8 → Auto redirect যোগ করো
+
+
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";

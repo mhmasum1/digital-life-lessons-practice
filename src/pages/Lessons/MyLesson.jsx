@@ -1,3 +1,34 @@
+// MyLesson — Short Plan Note 📝
+// কি কি Feature আছে:
+// 1. Lessons Fetch         → GET / lessons / my ? email =
+//     2. Delete Lesson         → DELETE / lessons / my /: id
+// 3. Visibility Update     → PATCH / lessons /:id { visibility }
+// 4. Access Level Update   → PATCH / lessons /:id { accessLevel }
+// 5. Row Loading State     → প্রতিটা row এর আলাদা busy state
+// 6. Optimistic Update     → UI আগে change, API পরে
+// 7. Rollback              → API fail হলে আগের state ফিরিয়ে দাও
+// 8. Premium Guard         → non - premium user premium select করতে পারবে না
+
+// State যা যা লাগবে:
+// lessons      → lessons array
+// loading      → page loading
+// rowLoading   → { lessonId: true / false } প্রতিটা row এর জন্য
+
+// নতুন করে করলে এই Order এ করো:
+// Step 1 → lessons fetch করো + table এ দেখাও
+// Step 2 → Delete feature যোগ করো
+// Step 3 → Visibility dropdown যোগ করো
+// Step 4 → Access Level dropdown যোগ করো
+// Step 5 → Row loading(busy) যোগ করো
+// Step 6 → Optimistic Update + Rollback যোগ করো
+// Step 7 → Premium Guard যোগ করো
+
+// Important Patterns:
+// rowLoading   → object — একটা row busy হলে বাকিগুলো normal
+// Optimistic   → UI আগে → API পরে → fail হলে rollback
+// Soft Delete  → database এ isDeleted: true, UI তে filter
+
+
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
