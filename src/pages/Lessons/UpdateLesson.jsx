@@ -1,3 +1,29 @@
+// UpdateLesson — Short Plan Note 📝
+
+// কি কি Feature আছে:
+// 1. Lesson Fetch          → GET /lessons/:id → form এ data fill করো
+// 2. Lesson Update         → PATCH /lessons/:id {formData}
+// 3. Controlled Inputs     → সব input formData state থেকে value নেয়
+// 4. handleChange          → একটাই function সব input এর জন্য কাজ করে
+// 5. Premium Guard         → non-premium user premium access select করতে পারবে না
+// 6. Cancel Button         → navigate(-1) → আগের page এ ফিরে যাও
+// 7. Auto Redirect         → update success → /dashboard/my-lessons এ যাও
+
+// State যা যা লাগবে:
+// formData  → সব input এর value একসাথে object এ
+// loading   → lesson fetch হচ্ছে কিনা
+// saving    → form submit হচ্ছে কিনা
+
+// নতুন করে করলে এই Order এ করো:
+// Step 1 → URL থেকে id নাও (useParams)
+// Step 2 → GET /lessons/:id → formData state fill করো
+// Step 3 → Form বানাও controlled inputs দিয়ে
+// Step 4 → handleChange যোগ করো — সব input এর জন্য
+// Step 5 → handleSubmit → PATCH request → redirect
+// Step 6 → Premium Guard → premium option disabled করো
+// Step 7 → Cancel button → navigate(-1)
+
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useAxiosSecure from "../../hooks/useAxiosSecure";

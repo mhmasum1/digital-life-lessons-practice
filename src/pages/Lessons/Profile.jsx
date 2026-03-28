@@ -1,3 +1,37 @@
+// Profile — Short Plan Note 📝
+
+// কি কি Feature আছে:
+// 1. Profile Info Show     → Firebase user + dbUser থেকে name, photo, email দেখাও
+// 2. Profile Update        → name + photo update → Firebase + database
+// 3. Photo Upload          → imgbb API তে upload করো → URL নাও → save করো
+// 4. Password Change       → reauthenticate → তারপর password update করো
+// 5. Public Lessons Fetch  → GET /lessons/my → filter করো (public + not deleted)
+// 6. Stats Show            → totalCreated (public lessons count) + totalSaved
+// 7. Premium Badge         → isPremium হলে ⭐ Premium badge দেখাও
+// 8. Cleanup               → cancelled flag → component unmount হলে state set বন্ধ
+
+// State যা যা লাগবে:
+// saving           → profile update হচ্ছে কিনা
+// name             → display name input
+// photoFile        → selected image file
+// currentPassword  → password change form
+// newPassword      → password change form
+// confirmPassword  → password change form
+// changingPass     → password update হচ্ছে কিনা
+// myPublicLessons  → public lessons array
+// loadingLessons   → lessons fetch হচ্ছে কিনা
+
+// নতুন করে করলে এই Order এ করো:
+// Step 1 → Profile info দেখাও (name, photo, email)
+// Step 2 → Public lessons fetch করো + filter করো
+// Step 3 → Stats দেখাও (totalCreated, totalSaved)
+// Step 4 → Profile update form বানাও (name + photo)
+// Step 5 → imgbb photo upload যোগ করো
+// Step 6 → Password change form যোগ করো
+// Step 7 → Premium badge যোগ করো
+// Step 8 → Public lessons grid দেখাও
+
+
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import useAuth from "../../hooks/useAuth";
@@ -22,11 +56,9 @@ const Profile = () => {
     const [myPublicLessons, setMyPublicLessons] = useState([]);
     const [loadingLessons, setLoadingLessons] = useState(true);
 
-    // form state
     const [name, setName] = useState(user?.displayName || dbUser?.name || "");
     const [photoFile, setPhotoFile] = useState(null);
 
-    // password states
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -34,22 +66,28 @@ const Profile = () => {
 
     useEffect(() => {
         setName(user?.displayName || dbUser?.name || "");
+        // ↑ Firebase আগে load হয়, dbUser পরে আসে
+        // তাই useEffect দরকার — সরাসরি useState এ দিলে dbUser পাবে না
     }, [user?.displayName, dbUser?.name]);
 
-    // Load user's lessons (protected) then show only PUBLIC lessons in profile
     useEffect(() => {
         if (!user?.email) return;
 
         let cancelled = false;
+        // ↑ component unmount হলে state set বন্ধ করতে — memory leak prevent
 
         const load = async () => {
             setLoadingLessons(true);
             try {
                 const res = await axiosSecure.get(`/lessons/my?email=${user.email}`);
                 const list = Array.isArray(res.data) ? res.data : [];
+
                 const publicOnly = list.filter(
                     (l) => l.visibility === "public" && l.isDeleted !== true
                 );
+                // ↑ সব lessons থেকে শুধু public + deleted না এমন গুলো নাও
+                // Profile এ শুধু public lessons দেখাবে
+
                 if (!cancelled) setMyPublicLessons(publicOnly);
             } catch (e) {
                 if (!cancelled) {
@@ -63,15 +101,16 @@ const Profile = () => {
         };
 
         load();
-        return () => {
-            cancelled = true;
-        };
+        return () => { cancelled = true; };
+        // ↑ cleanup — component unmount হলে cancelled = true
     }, [user?.email, axiosSecure]);
 
     const totalCreated = useMemo(() => myPublicLessons.length, [myPublicLessons]);
+    // ↑ myPublicLessons change হলেই recalculate করে
 
     const totalSaved = useMemo(() => {
         return dbUser?.savedCount ?? dbUser?.totalFavorites ?? null;
+        // ↑ savedCount আগে check → না থাকলে totalFavorites → দুটোই না থাকলে null
     }, [dbUser]);
 
     const handleUpdateProfile = async (e) => {
@@ -85,8 +124,10 @@ const Profile = () => {
             setSaving(true);
 
             let photoURL = user?.photoURL || dbUser?.photoURL || "";
+            // ↑ default — নতুন photo না দিলে আগেরটা রাখো
 
             if (photoFile) {
+                // ↑ নতুন photo select করা হলে imgbb তে upload করো
                 const key = import.meta.env.VITE_photo_host_key;
                 if (!key) {
                     toast.error("VITE_photo_host_key missing in .env");
@@ -97,18 +138,23 @@ const Profile = () => {
                 const formData = new FormData();
                 formData.append("image", photoFile);
 
-                const uploadURL = `https://api.imgbb.com/1/upload?key=${key}`;
-                const uploadRes = await axios.post(uploadURL, formData);
+                const uploadRes = await axios.post(
+                    `https://api.imgbb.com/1/upload?key=${key}`,
+                    formData
+                );
                 photoURL = uploadRes?.data?.data?.url || photoURL;
+                // ↑ imgbb থেকে URL নাও — fail হলে আগের URL রাখো
             }
 
             await updateUserProfile({ displayName: finalName, photoURL });
+            // ↑ Firebase profile update
 
             await axiosSecure.post("/users", {
                 email: user.email,
                 displayName: finalName,
                 photoURL,
             });
+            // ↑ database এও update করো
 
             toast.success("Profile updated!");
             setPhotoFile(null);
@@ -120,11 +166,12 @@ const Profile = () => {
         }
     };
 
-    // Password change handler
     const handleChangePassword = async (e) => {
         e.preventDefault();
 
         if (!user?.email) return toast.error("No logged in user");
+
+        // সব field validation
         if (!currentPassword || !newPassword || !confirmPassword) {
             return toast.error("All password fields are required");
         }
@@ -138,11 +185,12 @@ const Profile = () => {
         try {
             setChangingPass(true);
 
-            // 1) re-auth required
             await reauthenticateUser(currentPassword);
+            // ↑ Firebase এ password change এর আগে re-auth দরকার
+            // current password দিয়ে verify করো
 
-            // 2) update password
             await changeUserPassword(newPassword);
+            // ↑ re-auth success হলে নতুন password set করো
 
             toast.success("Password updated successfully");
             setCurrentPassword("");
@@ -160,13 +208,12 @@ const Profile = () => {
 
     return (
         <div className="p-4 md:p-6 space-y-6">
+
             {/* Header */}
             <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-semibold text-base-content">My Profile</h1>
-                    <p className="text-sm text-base-content/70">
-                        Manage your profile information
-                    </p>
+                    <p className="text-sm text-base-content/70">Manage your profile information</p>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -175,12 +222,15 @@ const Profile = () => {
                             <span>⭐</span>
                             <span className="font-semibold">Premium</span>
                         </span>
+                        // ↑ isPremium true হলে badge দেখাও
                     )}
                 </div>
             </div>
 
-            {/* Profile card */}
+            {/* Profile card + Update form */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+                {/* Left — avatar + stats */}
                 <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5">
                     <div className="flex items-center gap-3">
                         {user?.photoURL ? (
@@ -193,6 +243,7 @@ const Profile = () => {
                         ) : (
                             <div className="w-14 h-14 rounded-full border border-base-300 flex items-center justify-center font-bold text-base-content">
                                 {(user?.displayName?.[0] || user?.email?.[0] || "U").toUpperCase()}
+                                {/* ↑ photo না থাকলে নামের প্রথম letter দেখাও */}
                             </div>
                         )}
 
@@ -204,6 +255,7 @@ const Profile = () => {
                         </div>
                     </div>
 
+                    {/* Stats */}
                     <div className="mt-4 grid grid-cols-2 gap-3">
                         <div className="rounded-xl border border-base-300 p-3 bg-base-200">
                             <p className="text-xs text-base-content/60">Public Lessons</p>
@@ -212,6 +264,7 @@ const Profile = () => {
                         <div className="rounded-xl border border-base-300 p-3 bg-base-200">
                             <p className="text-xs text-base-content/60">Saved</p>
                             <p className="text-xl font-bold text-base-content">{totalSaved ?? "-"}</p>
+                            {/* ↑ null হলে "-" দেখাও */}
                         </div>
                     </div>
 
@@ -222,17 +275,13 @@ const Profile = () => {
                     </div>
                 </div>
 
-                {/* update form + password section */}
+                {/* Right — update form + password */}
                 <div className="lg:col-span-2 bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5">
-                    <h2 className="text-lg font-semibold mb-3 text-base-content">
-                        Update Profile
-                    </h2>
+                    <h2 className="text-lg font-semibold mb-3 text-base-content">Update Profile</h2>
 
                     <form onSubmit={handleUpdateProfile} className="space-y-4">
                         <div>
-                            <label className="text-sm font-medium text-base-content">
-                                Display Name
-                            </label>
+                            <label className="text-sm font-medium text-base-content">Display Name</label>
                             <input
                                 type="text"
                                 className="input input-bordered w-full mt-1 bg-base-100 text-base-content border-base-300"
@@ -243,18 +292,15 @@ const Profile = () => {
                         </div>
 
                         <div>
-                            <label className="text-sm font-medium text-base-content">
-                                Photo
-                            </label>
+                            <label className="text-sm font-medium text-base-content">Photo</label>
                             <input
                                 type="file"
                                 accept="image/*"
                                 className="file-input file-input-bordered w-full mt-1 bg-base-100 text-base-content border-base-300"
                                 onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
+                            // ↑ file select হলে photoFile state এ রাখো
                             />
-                            <p className="text-xs text-base-content/60 mt-1">
-                                Optional. JPG/PNG recommended.
-                            </p>
+                            <p className="text-xs text-base-content/60 mt-1">Optional. JPG/PNG recommended.</p>
                         </div>
 
                         <button disabled={saving} className="btn btn-primary btn-sm">
@@ -262,17 +308,13 @@ const Profile = () => {
                         </button>
                     </form>
 
-                    {/* Password update option */}
+                    {/* Password Change */}
                     <div className="mt-6 border-t border-base-300 pt-5">
-                        <h3 className="text-lg font-semibold text-base-content mb-3">
-                            Change Password
-                        </h3>
+                        <h3 className="text-lg font-semibold text-base-content mb-3">Change Password</h3>
 
                         <form onSubmit={handleChangePassword} className="space-y-3">
                             <div>
-                                <label className="text-sm font-medium text-base-content">
-                                    Current Password
-                                </label>
+                                <label className="text-sm font-medium text-base-content">Current Password</label>
                                 <input
                                     type="password"
                                     className="input input-bordered w-full mt-1"
@@ -283,9 +325,7 @@ const Profile = () => {
                             </div>
 
                             <div>
-                                <label className="text-sm font-medium text-base-content">
-                                    New Password
-                                </label>
+                                <label className="text-sm font-medium text-base-content">New Password</label>
                                 <input
                                     type="password"
                                     className="input input-bordered w-full mt-1"
@@ -296,9 +336,7 @@ const Profile = () => {
                             </div>
 
                             <div>
-                                <label className="text-sm font-medium text-base-content">
-                                    Confirm New Password
-                                </label>
+                                <label className="text-sm font-medium text-base-content">Confirm New Password</label>
                                 <input
                                     type="password"
                                     className="input input-bordered w-full mt-1"
@@ -313,19 +351,17 @@ const Profile = () => {
                             </button>
 
                             <p className="text-xs text-base-content/60">
-                                Note: For security, Firebase may require recent login before password change.
+                                Note: Firebase may require recent login before password change.
                             </p>
                         </form>
                     </div>
                 </div>
             </div>
 
-            {/* Public lessons */}
+            {/* Public Lessons Grid */}
             <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5">
                 <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-lg font-semibold text-base-content">
-                        My Public Lessons
-                    </h2>
+                    <h2 className="text-lg font-semibold text-base-content">My Public Lessons</h2>
                     <Link to="/dashboard/my-lessons" className="text-sm text-primary hover:underline">
                         Manage lessons →
                     </Link>
@@ -335,11 +371,9 @@ const Profile = () => {
                     <Spinner />
                 ) : myPublicLessons.length === 0 ? (
                     <div className="border border-base-300 bg-base-200 rounded-2xl p-6 text-center">
-                        <p className="font-medium mb-1 text-base-content">
-                            No public lessons yet.
-                        </p>
+                        <p className="font-medium mb-1 text-base-content">No public lessons yet.</p>
                         <p className="text-sm text-base-content/70 mb-3">
-                            Make a lesson public from “My Lessons” or create a new one.
+                            Make a lesson public from "My Lessons" or create a new one.
                         </p>
                         <Link to="/dashboard/add-lesson" className="btn btn-sm btn-primary">
                             Create a lesson
@@ -352,9 +386,7 @@ const Profile = () => {
                                 key={l._id}
                                 className="rounded-2xl border border-base-300 bg-base-100 p-4 hover:shadow-sm transition"
                             >
-                                <p className="font-semibold line-clamp-2 text-base-content">
-                                    {l.title}
-                                </p>
+                                <p className="font-semibold line-clamp-2 text-base-content">{l.title}</p>
                                 <p className="text-xs text-base-content/60 mt-1">
                                     {l.category} • {l.emotionalTone} • {l.accessLevel}
                                 </p>
@@ -363,13 +395,8 @@ const Profile = () => {
                                 </p>
 
                                 <div className="mt-3 flex gap-2">
-                                    <Link to={`/lessons/${l._id}`} className="btn btn-xs">
-                                        Details
-                                    </Link>
-                                    <Link
-                                        to={`/dashboard/update-lesson/${l._id}`}
-                                        className="btn btn-xs btn-outline"
-                                    >
+                                    <Link to={`/lessons/${l._id}`} className="btn btn-xs">Details</Link>
+                                    <Link to={`/dashboard/update-lesson/${l._id}`} className="btn btn-xs btn-outline">
                                         Update
                                     </Link>
                                 </div>
